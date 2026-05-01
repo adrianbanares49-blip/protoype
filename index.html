@@ -887,7 +887,7 @@ function saveGeminiKey() {
 function getGeminiKey() {
   return _geminiKey;
 }
-}
+
 // =====================================================================
 // AI IMPORT FEATURE
 // =====================================================================
@@ -1015,7 +1015,7 @@ const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     if (!response.ok) {
 const data = await response.json();
 const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    }
+    
 
     const cleaned = rawText.replace(/```json|```/g, '').trim();
     let items;
