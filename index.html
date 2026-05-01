@@ -1005,13 +1005,16 @@ setProgress(85, 'Processing results…', 'Organizing extracted items');
 
     setProgress(85, 'Processing results…', 'Organizing extracted items');
 
-    if (!response.ok) {
+if (!response.ok) {
+  const err = await response.json().catch(() => ({}));
+  throw new Error(err.error?.message || 'API request failed. Check your API key and try again.');
+}
+
 const data = await response.json();
 const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    }
 
-    const cleaned = rawText.replace(/```json|```/g, '').trim();
-    let items;
+const cleaned = rawText.replace(/```json|```/g, '').trim();
+let items;
     try {
       items = JSON.parse(cleaned);
     } catch(e) {
