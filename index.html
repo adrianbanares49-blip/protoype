@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RESI</title>
+<!-- pdf.js for local PDF text extraction (no API needed) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- mammoth.js for local DOCX text extraction (no API needed) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--color-background-tertiary,#f3f4f6);color:var(--color-text-primary,#111)}
@@ -441,6 +445,18 @@ nav{padding:8px 0;flex:1}
 .ai-import-sub{font-size:11px;color:var(--text-secondary)}
 .ai-import-btn{padding:8px 16px;border-radius:var(--r);border:1.5px solid var(--blue);background:var(--blue);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
 .ai-import-btn:hover{background:var(--blue-dark)}
+
+/* Step indicators */
+.ai-steps{display:flex;align-items:center;gap:0;margin-bottom:14px}
+.ai-step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-tertiary);flex:1}
+.ai-step-num{width:22px;height:22px;border-radius:50%;border:2px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;background:var(--bg-primary)}
+.ai-step.active .ai-step-num{border-color:var(--blue);background:var(--blue);color:#fff}
+.ai-step.done .ai-step-num{border-color:var(--green);background:var(--green);color:#fff}
+.ai-step.active{color:var(--text-primary);font-weight:500}
+.ai-step.done{color:var(--green)}
+.ai-step-divider{width:24px;height:2px;background:var(--border);flex-shrink:0;margin:0 4px}
+.ai-step.done + .ai-step-divider{background:var(--green)}
+
 .ai-progress-card{background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:16px;display:none}
 .ai-progress-card.visible{display:block}
 .ai-progress-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
@@ -450,6 +466,18 @@ nav{padding:8px 0;flex:1}
 .ai-progress-sub{font-size:11px;color:var(--text-secondary);margin-top:2px}
 .ai-prog-bar-wrap{background:var(--bg-tertiary);border-radius:4px;height:6px;overflow:hidden}
 .ai-prog-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),#4BA3E3);transition:width .4s ease;width:0%}
+
+/* Text preview card (new) */
+.ai-text-preview-card{background:var(--bg-primary);border:1px solid #B5D4F4;border-radius:var(--rl);overflow:hidden;margin-bottom:16px;display:none}
+.ai-text-preview-card.visible{display:block}
+.ai-text-preview-header{background:linear-gradient(135deg,#f0f7ff,#e6f1fb);padding:12px 16px;border-bottom:1px solid #B5D4F4;display:flex;align-items:center;justify-content:space-between}
+.ai-text-preview-title{font-size:13px;font-weight:600;color:var(--blue-dark);display:flex;align-items:center;gap:8px}
+.ai-text-chars{font-size:11px;background:var(--bg-secondary);color:var(--text-secondary);padding:2px 8px;border-radius:8px;border:1px solid var(--border)}
+.ai-text-preview-body{padding:12px 16px;max-height:200px;overflow-y:auto}
+.ai-text-preview-body pre{font-size:11px;color:var(--text-secondary);white-space:pre-wrap;word-break:break-word;font-family:inherit;line-height:1.5}
+.ai-text-preview-footer{padding:10px 16px;border-top:1px solid #B5D4F4;background:linear-gradient(135deg,#f8fcff,#f0f7ff);display:flex;align-items:center;justify-content:space-between}
+.ai-text-preview-note{font-size:11px;color:var(--text-secondary)}
+
 .ai-preview-card{background:var(--bg-primary);border:1px solid #B5D4F4;border-radius:var(--rl);overflow:hidden;margin-bottom:16px;display:none}
 .ai-preview-card.visible{display:block}
 .ai-preview-header{background:linear-gradient(135deg,var(--blue-light),#d0e8f8);padding:14px 16px;border-bottom:1px solid #B5D4F4;display:flex;align-items:center;justify-content:space-between}
@@ -551,20 +579,38 @@ nav{padding:8px 0;flex:1}
           <!-- Gemini API Key Bar -->
           <div class="ai-key-bar">
             <label>🔑 Gemini API Key</label>
-            <input type="password" id="gemini-key-input" placeholder="Paste your Gemini API key here…" autocomplete="off">
+            <input type="password" id="gemini-key-input" placeholder="Only needed for AI step — paste your Gemini API key here…" autocomplete="off">
             <button class="ai-key-save" onclick="saveGeminiKey()">Save</button>
             <span class="ai-key-status" id="gemini-key-status" style="color:var(--text-tertiary)">Not set</span>
           </div>
 
           <!-- AI Import Zone -->
           <div class="ai-import-zone" id="ai-import-zone" onclick="triggerAIImport()">
-            <div class="ai-import-icon">🤖</div>
+            <div class="ai-import-icon">📄</div>
             <div class="ai-import-text">
               <div class="ai-import-title">Import Checklist from Document</div>
-              <div class="ai-import-sub">Upload a DOCX or PDF checklist and AI will extract all items automatically</div>
+              <div class="ai-import-sub">Step 1: PDF/DOCX text is extracted locally (free, no API). Step 2: AI structures it into checklist items (requires Gemini API key).</div>
             </div>
             <button class="ai-import-btn" onclick="event.stopPropagation();triggerAIImport()">Choose File</button>
             <input type="file" id="ai-file-input" accept=".pdf,.docx,.doc" style="display:none" onchange="handleAIImport(this)">
+          </div>
+
+          <!-- Step indicators -->
+          <div class="ai-steps" id="ai-steps" style="display:none">
+            <div class="ai-step" id="ai-step-1">
+              <div class="ai-step-num">1</div>
+              <span>Extract Text</span>
+            </div>
+            <div class="ai-step-divider" id="ai-step-div-1"></div>
+            <div class="ai-step" id="ai-step-2">
+              <div class="ai-step-num">2</div>
+              <span>AI Analysis</span>
+            </div>
+            <div class="ai-step-divider" id="ai-step-div-2"></div>
+            <div class="ai-step" id="ai-step-3">
+              <div class="ai-step-num">3</div>
+              <span>Review &amp; Import</span>
+            </div>
           </div>
 
           <!-- Progress card -->
@@ -573,7 +619,7 @@ nav{padding:8px 0;flex:1}
               <div class="ai-spinner"></div>
               <div>
                 <div class="ai-progress-label" id="ai-progress-label">Reading document…</div>
-                <div class="ai-progress-sub" id="ai-progress-sub">Please wait while AI analyzes your file</div>
+                <div class="ai-progress-sub" id="ai-progress-sub">Please wait</div>
               </div>
             </div>
             <div class="ai-prog-bar-wrap"><div class="ai-prog-bar-fill" id="ai-prog-bar"></div></div>
@@ -586,7 +632,27 @@ nav{padding:8px 0;flex:1}
             <button class="icon-btn del-btn" style="margin-left:auto" onclick="hideAICards()">Dismiss</button>
           </div>
 
-          <!-- Preview card -->
+          <!-- Text Preview card (new step between extraction and AI) -->
+          <div class="ai-text-preview-card" id="ai-text-preview-card">
+            <div class="ai-text-preview-header">
+              <div class="ai-text-preview-title">
+                📄 Extracted Text
+              </div>
+              <span class="ai-text-chars" id="ai-text-chars">0 characters</span>
+            </div>
+            <div class="ai-text-preview-body">
+              <pre id="ai-text-preview-content"></pre>
+            </div>
+            <div class="ai-text-preview-footer">
+              <div class="ai-text-preview-note">✅ Text extracted locally — no API used yet. Click "Analyze with AI" to structure into checklist items.</div>
+              <div style="display:flex;gap:8px">
+                <button class="ai-discard-btn" onclick="hideAICards()">Discard</button>
+                <button class="ai-confirm-btn" onclick="sendTextToAI()">🤖 Analyze with AI →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview card (checklist items result) -->
           <div class="ai-preview-card" id="ai-preview-card">
             <div class="ai-preview-header">
               <div class="ai-preview-title">
@@ -884,33 +950,101 @@ function saveGeminiKey() {
   document.getElementById('gemini-key-status').style.color = 'var(--green)';
 }
 
-function getGeminiKey() {
-  return _geminiKey;
+function getGeminiKey() { return _geminiKey; }
+
+// =====================================================================
+//  STEP INDICATOR HELPERS
+// =====================================================================
+function setAIStep(activeStep) {
+  // activeStep: 1, 2, or 3
+  document.getElementById('ai-steps').style.display = 'flex';
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('ai-step-' + i);
+    el.classList.remove('active', 'done');
+    if (i < activeStep) el.classList.add('done');
+    else if (i === activeStep) el.classList.add('active');
+  }
+  for (let i = 1; i <= 2; i++) {
+    const div = document.getElementById('ai-step-div-' + i);
+    if (div) {
+      div.style.background = i < activeStep ? 'var(--green)' : 'var(--border)';
+    }
+  }
 }
 
+// =====================================================================
+//  LOCAL FILE EXTRACTION — no API key needed
+// =====================================================================
+async function extractTextFromFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'pdf') return await extractPDF(file);
+  if (['doc', 'docx'].includes(ext)) return await extractDOCX(file);
+  throw new Error('Unsupported file type. Please upload a PDF or DOCX file.');
+}
+
+async function extractPDF(file) {
+  // pdf.js loaded from CDN as window['pdfjs-dist/build/pdf']
+  const pdfjsLib = window['pdfjs-dist/build/pdf'];
+  if (!pdfjsLib) throw new Error('PDF.js failed to load. Please refresh the page and try again.');
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let fullText = '';
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    setProgress(10 + Math.round((i / pdf.numPages) * 55),
+      `Reading page ${i} of ${pdf.numPages}…`,
+      'Extracting text locally — no API used');
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    // Join items, preserving line breaks by checking y-position gaps
+    let lastY = null;
+    let pageText = '';
+    content.items.forEach(item => {
+      if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+        pageText += '\n';
+      }
+      pageText += item.str;
+      lastY = item.transform[5];
+    });
+    fullText += pageText + '\n';
+  }
+  return fullText.trim();
+}
+
+async function extractDOCX(file) {
+  if (!window.mammoth) throw new Error('Mammoth.js failed to load. Please refresh the page and try again.');
+  setProgress(30, 'Reading DOCX file…', 'Extracting text locally — no API used');
+  const arrayBuffer = await file.arrayBuffer();
+  const result = await window.mammoth.extractRawText({ arrayBuffer });
+  setProgress(70, 'Text extracted!', 'Ready for AI analysis');
+  return result.value.trim();
+}
 
 // =====================================================================
-// AI IMPORT FEATURE
+//  AI IMPORT — two-step flow
 // =====================================================================
 let aiExtractedItems = [];
+let _extractedText = '';
 
 function triggerAIImport() {
-  const key = getGeminiKey();
-  if (!key) {
-    showAIError('Please save your Gemini API key first using the field above.');
-    return;
-  }
   document.getElementById('ai-file-input').click();
 }
 
 function setProgress(pct, label, sub) {
   document.getElementById('ai-prog-bar').style.width = pct + '%';
   if (label) document.getElementById('ai-progress-label').textContent = label;
-  if (sub) document.getElementById('ai-progress-sub').textContent = sub;
+  if (sub !== undefined) document.getElementById('ai-progress-sub').textContent = sub;
 }
 
 function showAIProgress(show) {
   document.getElementById('ai-progress-card').classList.toggle('visible', show);
+}
+
+function showAITextPreview(show) {
+  document.getElementById('ai-text-preview-card').classList.toggle('visible', show);
 }
 
 function showAIPreview(show) {
@@ -925,48 +1059,76 @@ function showAIError(msg) {
 
 function hideAICards() {
   document.getElementById('ai-progress-card').classList.remove('visible');
+  document.getElementById('ai-text-preview-card').classList.remove('visible');
   document.getElementById('ai-preview-card').classList.remove('visible');
   document.getElementById('ai-error-card').classList.remove('visible');
+  document.getElementById('ai-steps').style.display = 'none';
   aiExtractedItems = [];
+  _extractedText = '';
   document.getElementById('ai-file-input').value = '';
 }
 
+// STEP 1: User picks file → extract text locally
 async function handleAIImport(input) {
   if (!input.files || !input.files[0]) return;
   const file = input.files[0];
-  const ext = file.name.split('.').pop().toLowerCase();
-  if (!['pdf','doc','docx'].includes(ext)) {
-    showAIError('Unsupported file type. Please upload a PDF or DOCX file.');
-    return;
-  }
-
-  const GEMINI_KEY = getGeminiKey();
-  if (!GEMINI_KEY) {
-    showAIError('No Gemini API key set. Please paste your key in the field above and click Save.');
-    return;
-  }
 
   hideAICards();
+  setAIStep(1);
   showAIProgress(true);
-  setProgress(10, 'Reading file…', 'Converting ' + file.name);
+  setProgress(5, 'Opening file…', 'Starting local extraction — no API used');
 
   try {
-    const base64 = await new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(r.result.split(',')[1]);
-      r.onerror = () => rej(new Error('Failed to read file'));
-      r.readAsDataURL(file);
-    });
+    const text = await extractTextFromFile(file);
 
-    setProgress(35, 'Sending to AI…', 'Analyzing document structure');
+    if (!text || text.length < 20) {
+      throw new Error('Could not extract readable text from this file. It may be scanned/image-based. Try a text-based PDF or DOCX.');
+    }
 
-    const mediaType = ext === 'pdf'
-      ? 'application/pdf'
-      : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    _extractedText = text;
+    setProgress(100, 'Text extracted!', '');
+    showAIProgress(false);
 
-    const promptText = `You are a compliance document analyzer for a Philippine engineering supply company (RESI).
+    // Show the text preview
+    const preview = text.length > 2000 ? text.slice(0, 2000) + '\n\n… (truncated for preview)' : text;
+    document.getElementById('ai-text-preview-content').textContent = preview;
+    document.getElementById('ai-text-chars').textContent = text.length.toLocaleString() + ' characters';
+    setAIStep(2);
+    showAITextPreview(true);
 
-Analyze this document and extract ALL checklist items, requirements, tasks, or action items from it.
+  } catch (err) {
+    showAIProgress(false);
+    document.getElementById('ai-steps').style.display = 'none';
+    showAIError(err.message || 'Failed to read file. Please try again.');
+  }
+
+  input.value = '';
+}
+
+// STEP 2: User clicks "Analyze with AI" → send extracted text to Gemini
+async function sendTextToAI() {
+  const GEMINI_KEY = getGeminiKey();
+  if (!GEMINI_KEY) {
+    showAIError('No Gemini API key set. Please paste your key above and click Save, then try again.');
+    return;
+  }
+  if (!_extractedText) {
+    showAIError('No extracted text found. Please upload a file first.');
+    return;
+  }
+
+  showAITextPreview(false);
+  showAIProgress(true);
+  setProgress(10, 'Sending text to Gemini…', 'Analyzing document structure');
+
+  // Trim text to avoid hitting token limits (Gemini 1.5 Pro handles up to ~1M tokens but keep it reasonable)
+  const textToSend = _extractedText.length > 15000
+    ? _extractedText.slice(0, 15000) + '\n[... document truncated for processing ...]'
+    : _extractedText;
+
+  const promptText = `You are a compliance document analyzer for a Philippine engineering supply company (RESI).
+
+The following is plain text extracted from a document. Analyze it and extract ALL checklist items, requirements, tasks, or action items.
 
 Return ONLY a valid JSON array with no markdown, no explanation, no preamble. Each item must have exactly these fields:
 - "label": the full text of the requirement or checklist item (string)
@@ -974,50 +1136,44 @@ Return ONLY a valid JSON array with no markdown, no explanation, no preamble. Ea
 - "type": one of: technical, financial, other
 
 Classification guide:
-- technical = anything about permits, certifications, legal registrations, safety, environmental, IT
-- financial = anything about taxes, fees, financial statements, insurance, accounting, HR contributions
+- technical = permits, certifications, legal registrations, safety, environmental, IT
+- financial = taxes, fees, financial statements, insurance, accounting, HR contributions
 - other = administrative tasks, miscellaneous items, general compliance
 
 If the document has no clear checklist or requirements, return an empty array: []
 
-Example output format:
-[{"label":"Business Permit from LGU","category":"Permits","type":"technical"},{"label":"BIR Tax Clearance","category":"Tax","type":"financial"}]`;
+DOCUMENT TEXT:
+${textToSend}`;
 
-    setProgress(60, 'AI is analyzing…', 'Extracting checklist items from document');
+  try {
+    setProgress(40, 'AI is reading the text…', 'Identifying checklist items');
 
-const response = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_KEY}`,
-  {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{
-        parts: [
-          { inline_data: { mime_type: mediaType, data: base64 } },
-          { text: promptText }
-        ]
-      }]
-    })
-  }
-);
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }]
+        })
+      }
+    );
 
-setProgress(85, 'Processing results…', 'Organizing extracted items');
+    setProgress(75, 'Processing AI response…', 'Organizing items');
 
-    setProgress(85, 'Processing results…', 'Organizing extracted items');
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'Gemini API request failed. Check your API key and try again.');
+    }
 
-if (!response.ok) {
-  const err = await response.json().catch(() => ({}));
-  throw new Error(err.error?.message || 'API request failed. Check your API key and try again.');
-}
+    const data = await response.json();
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const cleaned = rawText.replace(/```json|```/g, '').trim();
 
-const data = await response.json();
-const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-const cleaned = rawText.replace(/```json|```/g, '').trim();
-let items;
+    let items;
     try {
       items = JSON.parse(cleaned);
-    } catch(e) {
+    } catch (e) {
       const match = cleaned.match(/\[[\s\S]*\]/);
       if (match) items = JSON.parse(match[0]);
       else throw new Error('AI returned an unexpected format. Please try a different file.');
@@ -1029,25 +1185,24 @@ let items;
     showAIProgress(false);
 
     if (items.length === 0) {
-      showAIError('No checklist items found in this document. Make sure the file contains a list of requirements or tasks.');
+      showAIError('No checklist items found. Make sure the file contains a list of requirements or tasks.');
       return;
     }
 
     aiExtractedItems = items.map(item => ({
       label: String(item.label || '').trim(),
       category: String(item.category || 'Miscellaneous').trim(),
-      type: ['technical','financial','other'].includes(item.type) ? item.type : 'other'
+      type: ['technical', 'financial', 'other'].includes(item.type) ? item.type : 'other'
     })).filter(i => i.label.length > 0);
 
+    setAIStep(3);
     renderAIPreview();
     showAIPreview(true);
 
-  } catch(err) {
+  } catch (err) {
     showAIProgress(false);
     showAIError(err.message || 'Something went wrong. Please try again.');
   }
-
-  input.value = '';
 }
 
 function renderAIPreview() {
@@ -1090,6 +1245,7 @@ function confirmAIImport() {
   renderProjectDetail();
   updateStats();
 
+  // Success feedback on the import zone
   const zone = document.getElementById('ai-import-zone');
   const titleEl = zone.querySelector('.ai-import-title');
   const origTitle = titleEl.textContent;
@@ -1103,16 +1259,21 @@ function confirmAIImport() {
   }, 3000);
 }
 
-// On page load, restore key status display
+// Drag-and-drop setup
 document.addEventListener('DOMContentLoaded', () => {
-  // Drag-and-drop on AI import zone
+  // pdf.js sets itself as window['pdfjs-dist/build/pdf'] via CDN script
+  // Set worker path explicitly after load
+  if (window['pdfjs-dist/build/pdf']) {
+    window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
   const zone = document.getElementById('ai-import-zone');
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-active'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('drag-active'));
   zone.addEventListener('drop', e => {
     e.preventDefault();
     zone.classList.remove('drag-active');
-    if (!getGeminiKey()) { showAIError('Please save your Gemini API key first.'); return; }
     const file = e.dataTransfer.files[0];
     if (!file) return;
     try {
@@ -1121,10 +1282,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const input = document.getElementById('ai-file-input');
       input.files = dt.files;
       handleAIImport(input);
-    } catch(err) { showAIError('Could not process dropped file. Please use the Choose File button.'); }
+    } catch (err) {
+      showAIError('Could not process dropped file. Please use the Choose File button.');
+    }
   });
 
-  // Upload drop zone
   const uploadZone = document.getElementById('upload-drop-zone');
   if (uploadZone) {
     uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
@@ -1145,7 +1307,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // =====================================================================
-// ALL ORIGINAL FUNCTIONALITY BELOW
+// ALL ORIGINAL FUNCTIONALITY
 // =====================================================================
 
 function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
