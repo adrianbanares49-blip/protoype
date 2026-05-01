@@ -964,8 +964,10 @@ const response = await fetch("https://api.anthropic.com/v1/messages", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
+    "x-api-key": "sk-ant-YOUR-KEY-HERE",
+    "anthropic-version": "2023-06-01",
+    "anthropic-dangerous-direct-browser-access": "true",
   },
-  
 
     setProgress(85, 'Processing results…', 'Organizing extracted items');
 
