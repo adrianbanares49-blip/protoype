@@ -45,6 +45,16 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0
 .period-btn:hover{color:var(--text1)}
 .period-btn.active{background:var(--blue);color:#fff;box-shadow:0 2px 10px rgba(46,124,246,.35)}
 
+/* MAIN NAV TABS */
+.main-tabs{display:flex;gap:0;margin-bottom:28px;border-bottom:1px solid var(--border)}
+.main-tab{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;padding:11px 22px;border:none;background:transparent;color:var(--text2);cursor:pointer;transition:all .2s;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.main-tab:hover{color:var(--text1)}
+.main-tab.active{color:var(--text1);border-bottom-color:var(--blue)}
+
+/* TAB CONTENT */
+.tab-content{display:none}
+.tab-content.active{display:block}
+
 /* METRICS */
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:14px;margin-bottom:24px}
 .metric-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;transition:border-color .2s;animation:fadeUp .4s ease both}
@@ -75,12 +85,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0
 .leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
 .leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
 
-/* CATEGORY TABS */
-.cat-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
-.cat-tab{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
-.cat-tab:hover{color:var(--text1);border-color:var(--border-h)}
-.cat-tab.active{color:#fff;border-color:transparent}
-
 /* WL BAR */
 .wl-bar-wrap{display:flex;width:100%;height:8px;border-radius:8px;overflow:hidden;margin:8px 0 4px}
 .wl-bar-win{background:var(--win);height:100%;transition:width .6s ease}
@@ -99,10 +103,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0
 .cat-badge.w{color:var(--win)}.cat-badge.l{color:var(--loss)}.cat-badge.r{color:var(--text2)}
 
 /* ADD FORM */
-.add-panel{background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px;margin-bottom:24px;animation:fadeUp .35s ease both}
-.add-panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
-.add-panel-title{font-size:14px;font-weight:600}
-.add-panel-sub{font-size:12px;color:var(--text2);margin-top:2px}
 .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px}
 .form-group label{display:block;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 .form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-md);color:var(--text1);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s}
@@ -116,6 +116,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0
 .btn-win:hover{background:rgba(34,201,138,.2)}
 .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
 .btn-primary:hover{background:#1a5fd6}
+.btn-danger{background:var(--loss-d);color:var(--loss);border-color:var(--loss-b)}
+.btn-danger:hover{background:rgba(240,79,79,.2)}
 
 /* CONTRACTS TABLE */
 .ctable{width:100%;border-collapse:collapse;font-size:13px}
@@ -150,6 +152,65 @@ footer p{font-size:12px;color:var(--text3)}
 .footer-tag{font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);background:var(--bg-card);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
 
 .canvas-wrap{position:relative;width:100%}
+
+/* ── SUMMARY TAB ── */
+.sumtab-header{margin-bottom:24px}
+.sumtab-header h2{font-size:20px;font-weight:600;letter-spacing:-.02em}
+.sumtab-header p{font-size:13px;color:var(--text2);margin-top:5px}
+
+.sumtab-grid{display:grid;gap:16px;margin-bottom:24px}
+
+.sum-cat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:border-color .2s}
+.sum-cat-card:hover{border-color:var(--border-h)}
+.sum-cat-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.sum-cat-color{width:4px;height:36px;border-radius:4px;flex-shrink:0}
+.sum-cat-info{flex:1;min-width:0}
+.sum-cat-title{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.sum-cat-stats{display:flex;gap:16px;margin-top:3px;flex-wrap:wrap}
+.sum-cat-stat{font-size:12px;font-family:'DM Mono',monospace}
+.sum-cat-stat.w{color:var(--win)}.sum-cat-stat.l{color:var(--loss)}.sum-cat-stat.p{color:var(--pend)}.sum-cat-stat.r{color:var(--text2)}
+.sum-cat-chevron{font-size:12px;color:var(--text3);transition:transform .25s;flex-shrink:0}
+.sum-cat-chevron.open{transform:rotate(180deg)}
+
+.sum-cat-body{padding:0 20px;max-height:0;overflow:hidden;transition:max-height .35s ease, padding .35s ease}
+.sum-cat-body.open{padding:16px 20px;max-height:2000px}
+
+/* sub-product input rows */
+.sub-input-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.sub-input-row{display:grid;grid-template-columns:1fr 90px 90px 90px 80px;gap:10px;align-items:center}
+@media(max-width:700px){.sub-input-row{grid-template-columns:1fr;gap:6px}}
+.sub-input-label{font-size:13px;color:var(--text1);font-weight:500}
+.sub-input-group{display:flex;flex-direction:column;gap:3px}
+.sub-input-group label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.sub-input-group input{width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text1);font-family:'DM Mono',monospace;font-size:13px;padding:7px 10px;outline:none;transition:border-color .2s;text-align:center}
+.sub-input-group input:focus{border-color:var(--blue)}
+.sub-input-group input.win-input:focus{border-color:var(--win)}
+.sub-input-group input.loss-input:focus{border-color:var(--loss)}
+.sub-input-group input.pend-input:focus{border-color:var(--pend)}
+
+.sum-cat-footer{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.sum-cat-totals{display:flex;gap:16px;flex-wrap:wrap}
+.sum-total-item{font-size:12px;font-family:'DM Mono',monospace}
+.sum-total-item.w{color:var(--win)}.sum-total-item.l{color:var(--loss)}.sum-total-item.p{color:var(--pend)}
+.sum-save-btn{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:7px 16px;border-radius:var(--r-md);border:1px solid var(--win-b);background:var(--win-d);color:var(--win);cursor:pointer;transition:all .2s}
+.sum-save-btn:hover{background:rgba(34,201,138,.22)}
+
+/* summary totals card */
+.sum-totals-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px}
+.sum-totals-title{font-size:14px;font-weight:600;margin-bottom:16px}
+.sum-totals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.sum-total-big{background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;text-align:center}
+.sum-total-big-val{font-size:30px;font-weight:600;font-family:'DM Mono',monospace}
+.sum-total-big-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+
+/* toast */
+.toast{position:fixed;bottom:28px;right:28px;background:#181c24;border:1px solid var(--win-b);color:var(--win);font-size:13px;padding:12px 18px;border-radius:var(--r-md);z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* wl bar in summary */
+.sum-wl-bar{display:flex;width:100%;height:5px;border-radius:5px;overflow:hidden;margin-top:6px}
+.sum-wl-bar-win{background:var(--win);height:100%;transition:width .5s ease}
+.sum-wl-bar-loss{background:var(--loss);height:100%;transition:width .5s ease}
 </style>
 </head>
 <body>
@@ -185,161 +246,195 @@ footer p{font-size:12px;color:var(--text3)}
   </div>
 </div>
 
-<!-- SUMMARY METRICS -->
-<div class="metrics" id="metricsEl"></div>
-
-<!-- OVERALL WIN/LOSS BAR CHART -->
-<div class="row1">
-  <div class="card">
-    <div class="card-hdr">
-      <div>
-        <div class="card-title">Overall Bids Won vs. Lost</div>
-        <div class="card-sub" id="chart-sub">All categories combined</div>
-      </div>
-      <span class="card-badge" id="period-label">2024 Monthly</span>
-    </div>
-    <div class="legend">
-      <span class="leg-item"><span class="leg-dot" style="background:var(--win)"></span>Won</span>
-      <span class="leg-item"><span class="leg-dot" style="background:var(--loss)"></span>Lost</span>
-      <span class="leg-item"><span class="leg-dot" style="background:var(--pend)"></span>Pending</span>
-    </div>
-    <div class="canvas-wrap" style="height:300px">
-      <canvas id="mainChart" role="img" aria-label="Bar chart of overall bids won and lost per period"></canvas>
-    </div>
-  </div>
+<!-- MAIN TABS -->
+<div class="main-tabs">
+  <button class="main-tab active" data-tab="analytics">📊 Analytics Dashboard</button>
+  <button class="main-tab" data-tab="summary">📋 Summary of Bidding Results</button>
+  <button class="main-tab" data-tab="log">📝 Contract Bid Log</button>
 </div>
 
-<!-- BY CATEGORY + WIN RATE -->
-<div class="row3">
-  <div class="card">
-    <div class="card-hdr">
-      <div>
-        <div class="card-title">Win/Loss by Product Category</div>
-        <div class="card-sub">All 5 product &amp; service lines</div>
-      </div>
-    </div>
-    <ul class="cat-sum-list" id="catSumList"></ul>
-  </div>
-  <div class="card">
-    <div class="card-hdr">
-      <div>
-        <div class="card-title">Overall Win Rate</div>
-        <div class="card-sub">Bid success rate</div>
-      </div>
-    </div>
-    <div class="gauge-wrap">
-      <div class="gauge-num" id="gaugeNum" style="color:var(--win)">—</div>
-      <div class="gauge-lbl">Win Rate (decided bids)</div>
-      <div class="wl-bar-wrap" style="margin-top:18px;height:10px">
-        <div class="wl-bar-win" id="winBar" style="width:0%"></div>
-        <div class="wl-bar-loss" id="lossBar" style="width:0%"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;width:100%;margin-top:4px">
-        <span id="winCountLbl">Won: —</span>
-        <span id="lossCountLbl">Lost: —</span>
-      </div>
-      <div class="gauge-sub">
-        <div class="gauge-sub-item"><div class="gauge-sub-val" style="color:var(--win)" id="gs-won">—</div><div class="gauge-sub-lbl">Won</div></div>
-        <div class="gauge-sub-item"><div class="gauge-sub-val" style="color:var(--loss)" id="gs-lost">—</div><div class="gauge-sub-lbl">Lost</div></div>
-        <div class="gauge-sub-item"><div class="gauge-sub-val" style="color:var(--pend)" id="gs-pend">—</div><div class="gauge-sub-lbl">Pending</div></div>
-        <div class="gauge-sub-item"><div class="gauge-sub-val" style="color:var(--blue)" id="gs-total">—</div><div class="gauge-sub-lbl">Total</div></div>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- ══════════ TAB: ANALYTICS ══════════ -->
+<div class="tab-content active" id="tab-analytics">
 
-<!-- CONTRACT VALUE CHART + DONUT -->
-<div class="row2">
-  <div class="card">
-    <div class="card-hdr">
-      <div>
-        <div class="card-title">Contract Value — Won vs. Lost</div>
-        <div class="card-sub">₱ millions per period</div>
-      </div>
-    </div>
-    <div class="legend">
-      <span class="leg-item"><span class="leg-dot" style="background:var(--win)"></span>Won Value</span>
-      <span class="leg-item"><span class="leg-dot" style="background:var(--loss)"></span>Lost Value</span>
-    </div>
-    <div class="canvas-wrap" style="height:260px">
-      <canvas id="valueChart" role="img" aria-label="Bar chart of contract values won vs lost"></canvas>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-hdr">
-      <div>
-        <div class="card-title">Won Bids — Category Share</div>
-        <div class="card-sub">Proportion of wins per line</div>
-      </div>
-    </div>
-    <div class="canvas-wrap" style="height:210px">
-      <canvas id="donutChart" role="img" aria-label="Donut chart of won bids by category"></canvas>
-    </div>
-    <div class="legend" id="donutLegend" style="margin-top:14px;justify-content:center"></div>
-  </div>
-</div>
+  <!-- SUMMARY METRICS -->
+  <div class="metrics" id="metricsEl"></div>
 
-<!-- ADD CONTRACT SECTION -->
-<div class="card" style="margin-bottom:20px">
-  <div class="card-hdr">
+  <!-- OVERALL WIN/LOSS BAR CHART -->
+  <div class="row1">
+    <div class="card">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Overall Bids Won vs. Lost</div>
+          <div class="card-sub" id="chart-sub">All categories combined</div>
+        </div>
+        <span class="card-badge" id="period-label">2024 Monthly</span>
+      </div>
+      <div class="legend">
+        <span class="leg-item"><span class="leg-dot" style="background:var(--win)"></span>Won</span>
+        <span class="leg-item"><span class="leg-dot" style="background:var(--loss)"></span>Lost</span>
+        <span class="leg-item"><span class="leg-dot" style="background:var(--pend)"></span>Pending</span>
+      </div>
+      <div class="canvas-wrap" style="height:300px">
+        <canvas id="mainChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- BY CATEGORY + WIN RATE -->
+  <div class="row3">
+    <div class="card">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Win/Loss by Product Category</div>
+          <div class="card-sub">All 5 product &amp; service lines</div>
+        </div>
+      </div>
+      <ul class="cat-sum-list" id="catSumList"></ul>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Overall Win Rate</div>
+          <div class="card-sub">Bid success rate</div>
+        </div>
+      </div>
+      <div class="gauge-wrap">
+        <div class="gauge-num" id="gaugeNum" style="color:var(--win)">—</div>
+        <div class="gauge-lbl">Win Rate (decided bids)</div>
+        <div class="wl-bar-wrap" style="margin-top:18px;height:10px">
+          <div class="wl-bar-win" id="winBar" style="width:0%"></div>
+          <div class="wl-bar-loss" id="lossBar" style="width:0%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;width:100%;margin-top:4px">
+          <span id="winCountLbl">Won: —</span>
+          <span id="lossCountLbl">Lost: —</span>
+        </div>
+        <div class="gauge-sub">
+          <div class="gauge-sub-item"><div class="gauge-sub-val" style="color:var(--win)" id="gs-won">—</div><div class="gauge-sub-lbl">Won</div></div>
+          <div class="gauge-sub-item"><div class="gauge-sub-val" style="color:var(--loss)" id="gs-lost">—</div><div class="gauge-sub-lbl">Lost</div></div>
+          <div class="gauge-sub-item"><div class="gauge-sub-val" style="color:var(--pend)" id="gs-pend">—</div><div class="gauge-sub-lbl">Pending</div></div>
+          <div class="gauge-sub-item"><div class="gauge-sub-val" style="color:var(--blue)" id="gs-total">—</div><div class="gauge-sub-lbl">Total</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTRACT VALUE CHART + DONUT -->
+  <div class="row2">
+    <div class="card">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Contract Value — Won vs. Lost</div>
+          <div class="card-sub">₱ millions per period</div>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="leg-item"><span class="leg-dot" style="background:var(--win)"></span>Won Value</span>
+        <span class="leg-item"><span class="leg-dot" style="background:var(--loss)"></span>Lost Value</span>
+      </div>
+      <div class="canvas-wrap" style="height:260px">
+        <canvas id="valueChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Won Bids — Category Share</div>
+          <div class="card-sub">Proportion of wins per line</div>
+        </div>
+      </div>
+      <div class="canvas-wrap" style="height:210px">
+        <canvas id="donutChart"></canvas>
+      </div>
+      <div class="legend" id="donutLegend" style="margin-top:14px;justify-content:center"></div>
+    </div>
+  </div>
+
+</div>
+<!-- ══════════ END TAB: ANALYTICS ══════════ -->
+
+
+<!-- ══════════ TAB: SUMMARY OF BIDDING RESULTS ══════════ -->
+<div class="tab-content" id="tab-summary">
+
+  <div class="sumtab-header">
+    <h2>Summary of Bidding Results</h2>
+    <p>Enter the number of won, lost, and pending bids per sub-product / item in each category. Changes are saved to your browser.</p>
+  </div>
+
+  <!-- Overall summary totals -->
+  <div class="sum-totals-card" style="margin-bottom:20px" id="sumTotalsCard">
+    <div class="sum-totals-title">Overall Totals (from summary entries)</div>
+    <div class="sum-totals-grid" id="sumTotalsGrid"></div>
+  </div>
+
+  <!-- Per-category accordion -->
+  <div class="sumtab-grid" id="sumCatGrid"></div>
+
+</div>
+<!-- ══════════ END TAB: SUMMARY ══════════ -->
+
+
+<!-- ══════════ TAB: CONTRACT LOG ══════════ -->
+<div class="tab-content" id="tab-log">
+
+  <!-- ADD CONTRACT SECTION (no "+ Add Bid" button in header) -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-hdr">
+      <div>
+        <div class="card-title">Add Contract Bid Result</div>
+        <div class="card-sub">Record a new winning or losing bid to any product category</div>
+      </div>
+    </div>
     <div>
-      <div class="card-title">Add Contract Bid Result</div>
-      <div class="card-sub">Record a new winning or losing bid to any product category</div>
-    </div>
-    <button class="btn btn-win" onclick="toggleAddPanel()">+ Add Bid</button>
-  </div>
-  <div id="addPanel" style="display:none">
-    <div style="border-top:1px solid var(--border);margin-bottom:18px"></div>
-    <div class="form-grid">
-      <div class="form-group" style="grid-column:span 2">
-        <label>Contract / Project Name</label>
-        <input type="text" id="f-name" placeholder="e.g. MWSS Water Treatment Plant Upgrade"/>
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:span 2">
+          <label>Contract / Project Name</label>
+          <input type="text" id="f-name" placeholder="e.g. MWSS Water Treatment Plant Upgrade"/>
+        </div>
+        <div class="form-group">
+          <label>Product Category</label>
+          <select id="f-cat">
+            <option value="">Select category...</option>
+            <option value="0">1.0 Electro-Mechanical</option>
+            <option value="1">2.0 Control & Monitoring</option>
+            <option value="2">3.0 Water Treatment & Filtration</option>
+            <option value="3">4.0 Power Generation System</option>
+            <option value="4">5.0 Water Treatment Chemicals</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Sub-product / Item</label>
+          <select id="f-sub"></select>
+        </div>
+        <div class="form-group">
+          <label>Client / Agency</label>
+          <input type="text" id="f-client" placeholder="e.g. MWSS, Meralco, DPWH"/>
+        </div>
+        <div class="form-group">
+          <label>Bid Value (₱ millions)</label>
+          <input type="number" id="f-val" placeholder="0.0" min="0" step="0.1"/>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="f-status">
+            <option value="won">Won</option>
+            <option value="lost">Lost</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="f-date"/>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Product Category</label>
-        <select id="f-cat">
-          <option value="">Select category...</option>
-          <option value="0">1.0 Electro-Mechanical</option>
-          <option value="1">2.0 Control & Monitoring</option>
-          <option value="2">3.0 Water Treatment & Filtration</option>
-          <option value="3">4.0 Power Generation System</option>
-          <option value="4">5.0 Water Treatment Chemicals</option>
-        </select>
+      <div class="form-btns">
+        <button class="btn btn-primary" onclick="submitBid()">Save Bid Result</button>
       </div>
-      <div class="form-group">
-        <label>Sub-product / Item</label>
-        <select id="f-sub"></select>
-      </div>
-      <div class="form-group">
-        <label>Client / Agency</label>
-        <input type="text" id="f-client" placeholder="e.g. MWSS, Meralco, DPWH"/>
-      </div>
-      <div class="form-group">
-        <label>Bid Value (₱ millions)</label>
-        <input type="number" id="f-val" placeholder="0.0" min="0" step="0.1"/>
-      </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select id="f-status">
-          <option value="won">Won</option>
-          <option value="lost">Lost</option>
-          <option value="pending">Pending</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Date</label>
-        <input type="date" id="f-date"/>
-      </div>
-    </div>
-    <div class="form-btns">
-      <button class="btn btn-ghost" onclick="toggleAddPanel()">Cancel</button>
-      <button class="btn btn-primary" onclick="submitBid()">Save Bid Result</button>
     </div>
   </div>
-</div>
 
-<!-- CONTRACT LOG TABLE -->
-<div class="row1">
+  <!-- CONTRACT LOG TABLE -->
   <div class="card">
     <div class="card-hdr">
       <div>
@@ -382,71 +477,94 @@ footer p{font-size:12px;color:var(--text3)}
     </div>
     <div id="emptyState" class="empty" style="display:none">No entries match the current filter.</div>
   </div>
+
 </div>
+<!-- ══════════ END TAB: LOG ══════════ -->
 
 <footer>
   <p>© 2024 BidTracker · Industrial Automation & SCADA · All data is stored locally in your browser</p>
-  <span class="footer-tag">v2.0.0 · bidding-analytics</span>
+  <span class="footer-tag">v3.0.0 · bidding-analytics</span>
 </footer>
 </div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
 // ── DATA DEFINITIONS ──────────────────────────────────────────────
 const CATS = [
-  {
-    id:0, num:'1.0', name:'Electro-Mechanical', color:'#2e7cf6',
-    subs:['Submersible Pumps & Motors','Transfer & Booster Pumps','Solenoid & Motor Driven Dosing Pumps','G.I. FRP/GRP Panel Water Tanks','uPVC Column/Riser Pipes']
-  },
-  {
-    id:1, num:'2.0', name:'Control & Monitoring', color:'#22c98a',
-    subs:['Variable Frequency Inverter Drives (VFD)','Programmable Logic Controller (PLC)','GSM Motor Controller','Human Machine Interface (HMI)','Quarter & Multi Turn Electric Actuators','Automatic Transfer Switch (ATS)','District Metering Area','SCADA']
-  },
-  {
-    id:2, num:'3.0', name:'Water Treatment & Filtration', color:'#f5a623',
-    subs:['Sand Filter & Filtration System','Ion Exchange Media Filtration System','Sand Filter Media Purification System','Water Quality Analysis Meter']
-  },
-  {
-    id:3, num:'4.0', name:'Power Generation System', color:'#c46ef0',
-    subs:['Diesel Power Generating Set','Off/On Grid Solar Power Generating System','Vertical Axis Wind Turbine Power Generating System']
-  },
-  {
-    id:4, num:'5.0', name:'Water Treatment Chemicals', color:'#f04f4f',
-    subs:['Chlorine Dioxide Powder','Chlorine Granules','Sequestration Additives','Poly Aluminum Chloride (PAC)']
-  },
+  {id:0,num:'1.0',name:'Electro-Mechanical',color:'#2e7cf6',
+    subs:['Submersible Pumps & Motors','Transfer & Booster Pumps','Solenoid & Motor Driven Dosing Pumps','G.I. FRP/GRP Panel Water Tanks','uPVC Column/Riser Pipes']},
+  {id:1,num:'2.0',name:'Control & Monitoring',color:'#22c98a',
+    subs:['Variable Frequency Inverter Drives (VFD)','Programmable Logic Controller (PLC)','GSM Motor Controller','Human Machine Interface (HMI)','Quarter & Multi Turn Electric Actuators','Automatic Transfer Switch (ATS)','District Metering Area','SCADA']},
+  {id:2,num:'3.0',name:'Water Treatment & Filtration',color:'#f5a623',
+    subs:['Sand Filter & Filtration System','Ion Exchange Media Filtration System','Sand Filter Media Purification System','Water Quality Analysis Meter']},
+  {id:3,num:'4.0',name:'Power Generation System',color:'#c46ef0',
+    subs:['Diesel Power Generating Set','Off/On Grid Solar Power Generating System','Vertical Axis Wind Turbine Power Generating System']},
+  {id:4,num:'5.0',name:'Water Treatment Chemicals',color:'#f04f4f',
+    subs:['Chlorine Dioxide Powder','Chlorine Granules','Sequestration Additives','Poly Aluminum Chloride (PAC)']},
 ];
 
-// ── PERIOD DATA (sample baseline) ────────────────────────────────
+// PERIODS: labels/meta only — all counts come from real data
 const PERIODS = {
   monthly:{
     labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-    sub:'Jan – Dec 2024',label:'2024 Monthly',
-    won:    [4,3,5,6,4,7,5,8,6,7,8,9],
-    lost:   [3,4,3,2,4,3,4,3,3,2,3,2],
-    pending:[1,1,2,1,2,1,1,2,1,2,1,2],
-    wonVal: [12,10,15,18,13,20,16,22,19,21,24,27],
-    lostVal:[8,11,9,7,12,9,11,8,9,7,9,6],
+    sub:'Jan – Dec 2024', label:'2024 Monthly',
   },
   quarterly:{
     labels:['Q1 2023','Q2 2023','Q3 2023','Q4 2023','Q1 2024','Q2 2024','Q3 2024','Q4 2024'],
-    sub:'Q1 2023 – Q4 2024',label:'Quarterly View',
-    won:    [14,17,18,20,12,17,19,24],
-    lost:   [9,8,7,6,10,9,10,8],
-    pending:[3,4,3,4,4,4,4,6],
-    wonVal: [37,46,50,55,35,51,57,74],
-    lostVal:[24,22,19,16,28,25,28,22],
+    sub:'Q1 2023 – Q4 2024', label:'Quarterly View',
   },
   yearly:{
     labels:['2020','2021','2022','2023','2024'],
-    sub:'2020 – 2024',label:'5-Year Overview',
-    won:    [38,44,55,69,72],
-    lost:   [28,25,22,30,45],
-    pending:[8,10,12,14,30],
-    wonVal: [95,118,148,187,217],
-    lostVal:[70,65,58,72,106],
+    sub:'2020 – 2024', label:'5-Year Overview',
   }
 };
 
-// ── SAMPLE CONTRACTS ─────────────────────────────────────────────
+// Build aggregated totals from BOTH contracts AND summaryData per period bucket
+function buildPeriodData(periodKey){
+  const d = PERIODS[periodKey];
+  const won=[], lost=[], pending=[], wonVal=[], lostVal=[];
+
+  d.labels.forEach((lbl, idx)=>{
+    let w=0, l=0, p=0, wv=0, lv=0;
+
+    // ── from Contract Log ──
+    contracts.forEach(c=>{
+      const cd = new Date(c.date);
+      let match = false;
+      if(periodKey==='monthly')      match = (cd.getFullYear()===2024 && cd.getMonth()===idx);
+      else if(periodKey==='quarterly'){ const qY=idx<4?2023:2024, qI=idx%4; match=(cd.getFullYear()===qY && Math.floor(cd.getMonth()/3)===qI); }
+      else                            match = (cd.getFullYear()===(2020+idx));
+      if(match){
+        if(c.status==='won')    { w++;  wv+=c.val||0; }
+        else if(c.status==='lost')  { l++;  lv+=c.val||0; }
+        else                        { p++; }
+      }
+    });
+
+    // ── from Summary Tab ──
+    // Summary data has no date, so we distribute all summary totals into the LAST bucket
+    // (most recent label) so they always appear on the chart.
+    // This is the most honest representation since summary data is undated.
+    const isLast = (idx === d.labels.length - 1);
+    if(isLast){
+      Object.values(summaryData).forEach(sd=>{
+        w  += +sd.won     ||0;
+        l  += +sd.lost    ||0;
+        p  += +sd.pending ||0;
+        wv += +sd.wonVal  ||0;
+        lv += +sd.lostVal ||0;
+      });
+    }
+
+    won.push(w); lost.push(l); pending.push(p); wonVal.push(wv); lostVal.push(lv);
+  });
+
+  return {labels:d.labels, sub:d.sub, label:d.label, won, lost, pending, wonVal, lostVal};
+}
+
+// ── STORAGE ───────────────────────────────────────────────────────
 let contracts = JSON.parse(localStorage.getItem('bidtracker_contracts') || 'null') || [
   {id:uid(),name:'MWSS Water Treatment Upgrade',catId:2,sub:'Sand Filter & Filtration System',client:'MWSS',val:18.4,date:'2024-12-10',status:'won'},
   {id:uid(),name:'Meralco SCADA Monitoring System',catId:1,sub:'SCADA',client:'Meralco',val:14.2,date:'2024-12-05',status:'won'},
@@ -465,8 +583,12 @@ let contracts = JSON.parse(localStorage.getItem('bidtracker_contracts') || 'null
   {id:uid(),name:'MWCI Dosing Pump Supply',catId:0,sub:'Solenoid & Motor Driven Dosing Pumps',client:'MWCI',val:3.7,date:'2024-08-15',status:'won'},
 ];
 
+// Summary data: { catId_subIdx: {won, lost, pending, wonVal, lostVal} }
+let summaryData = JSON.parse(localStorage.getItem('bidtracker_summary') || '{}');
+
 function uid(){return Math.random().toString(36).slice(2,9)}
 function save(){localStorage.setItem('bidtracker_contracts',JSON.stringify(contracts))}
+function saveSummary(){localStorage.setItem('bidtracker_summary',JSON.stringify(summaryData))}
 
 // ── STATE ──────────────────────────────────────────────────────────
 let period = 'monthly';
@@ -476,14 +598,12 @@ let mainChart, valueChart, donutChart;
 document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
 document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
 
-// populate sub-product dropdown on cat change
 document.getElementById('f-cat').addEventListener('change', function(){
   const cat = CATS[+this.value];
   const sel = document.getElementById('f-sub');
   sel.innerHTML = cat ? cat.subs.map(s=>`<option value="${s}">${s}</option>`).join('') : '<option value="">—</option>';
 });
 
-// period tabs
 document.querySelectorAll('.period-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
@@ -493,24 +613,40 @@ document.querySelectorAll('.period-btn').forEach(btn=>{
   });
 });
 
+// Main tab switching
+document.querySelectorAll('.main-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+    if(tab.dataset.tab==='analytics') renderAll();
+    if(tab.dataset.tab==='summary') renderSummaryTab();
+    if(tab.dataset.tab==='log') renderTable();
+  });
+});
+
 // ── HELPERS ────────────────────────────────────────────────────────
 function catStats(){
-  return CATS.map(c=>({
-    won:     contracts.filter(x=>x.catId===c.id && x.status==='won').length,
-    lost:    contracts.filter(x=>x.catId===c.id && x.status==='lost').length,
-    pending: contracts.filter(x=>x.catId===c.id && x.status==='pending').length,
-    wonVal:  contracts.filter(x=>x.catId===c.id && x.status==='won').reduce((a,b)=>a+b.val,0),
-  }));
+  const combined = getCombinedSummary();
+  return CATS.map(c=>{
+    let won=0,lost=0,pending=0,wonVal=0,lostVal=0;
+    c.subs.forEach((_,si)=>{
+      const d=combined[`${c.id}_${si}`]||{};
+      won+=d.won||0; lost+=d.lost||0; pending+=d.pending||0; wonVal+=d.wonVal||0; lostVal+=d.lostVal||0;
+    });
+    return {won,lost,pending,wonVal,lostVal};
+  });
 }
 
 function globalStats(){
-  const won     = contracts.filter(x=>x.status==='won').length;
-  const lost    = contracts.filter(x=>x.status==='lost').length;
-  const pending = contracts.filter(x=>x.status==='pending').length;
-  const total   = won+lost+pending;
-  const wonVal  = contracts.filter(x=>x.status==='won').reduce((a,b)=>a+b.val,0);
-  const lostVal = contracts.filter(x=>x.status==='lost').reduce((a,b)=>a+b.val,0);
-  const wr = (won+lost)>0 ? Math.round(won/(won+lost)*100) : 0;
+  const combined = getCombinedSummary();
+  let won=0,lost=0,pending=0,wonVal=0,lostVal=0;
+  Object.values(combined).forEach(d=>{
+    won+=d.won||0; lost+=d.lost||0; pending+=d.pending||0; wonVal+=d.wonVal||0; lostVal+=d.lostVal||0;
+  });
+  const total=won+lost+pending;
+  const wr=(won+lost)>0?Math.round(won/(won+lost)*100):0;
   return {won,lost,pending,total,wonVal,lostVal,wr};
 }
 
@@ -518,10 +654,10 @@ function globalStats(){
 function renderMetrics(){
   const s = globalStats();
   const defs = [
-    {lbl:'Total Bids',    val:s.total,   cls:'norm', chg:'All categories',           dir:''},
-    {lbl:'Contracts Won', val:s.won,     cls:'win',  chg:`Win rate: ${s.wr}%`,       dir:'up'},
-    {lbl:'Contracts Lost',val:s.lost,    cls:'loss', chg:'Review recommended',        dir:'down'},
-    {lbl:'Pending',       val:s.pending, cls:'pend', chg:'Awaiting decision',         dir:''},
+    {lbl:'Total Bids',    val:s.total, cls:'norm', chg:'All categories',           dir:''},
+    {lbl:'Contracts Won', val:s.won,   cls:'win',  chg:`Win rate: ${s.wr}%`,       dir:'up'},
+    {lbl:'Contracts Lost',val:s.lost,  cls:'loss', chg:'Review recommended',        dir:'down'},
+    {lbl:'Pending',       val:s.pending,cls:'pend',chg:'Awaiting decision',         dir:''},
     {lbl:'Won Value',     val:'₱'+s.wonVal.toFixed(1)+'M', cls:'blue', chg:'Total contract value', dir:'up'},
   ];
   document.getElementById('metricsEl').innerHTML = defs.map(d=>`
@@ -532,7 +668,6 @@ function renderMetrics(){
     </div>`).join('');
 }
 
-// ── RENDER GAUGE ───────────────────────────────────────────────────
 function renderGauge(){
   const s = globalStats();
   document.getElementById('gaugeNum').textContent = s.wr+'%';
@@ -546,7 +681,6 @@ function renderGauge(){
   document.getElementById('gs-total').textContent = s.total;
 }
 
-// ── RENDER CAT SUMMARY ─────────────────────────────────────────────
 function renderCatSummary(){
   const stats = catStats();
   document.getElementById('catSumList').innerHTML = CATS.map((c,i)=>{
@@ -575,82 +709,33 @@ function renderCatSummary(){
   }).join('');
 }
 
-// ── RENDER CHARTS ──────────────────────────────────────────────────
 function renderMainChart(){
-  const d = PERIODS[period];
+  const d = buildPeriodData(period);
   document.getElementById('chart-sub').textContent = d.sub+' · Number of contracts';
   document.getElementById('period-label').textContent = d.label;
-
-  // merge user entries into period totals
-  const now = new Date();
-  const userWon=[], userLost=[], userPend=[];
-
-  d.labels.forEach((lbl,idx)=>{
-    let w=0,l=0,p=0;
-    contracts.forEach(c=>{
-      const cd = new Date(c.date);
-      let match = false;
-      if(period==='monthly'){
-        match = (cd.getFullYear()===2024 && cd.getMonth()===idx);
-      } else if(period==='quarterly'){
-        const qYear = idx<4?2023:2024;
-        const qIdx  = idx%4;
-        match = (cd.getFullYear()===qYear && Math.floor(cd.getMonth()/3)===qIdx);
-      } else {
-        match = (cd.getFullYear()===(2020+idx));
-      }
-      if(match){ if(c.status==='won')w++; else if(c.status==='lost')l++; else p++; }
-    });
-    userWon.push(d.won[idx]+(w));
-    userLost.push(d.lost[idx]+(l));
-    userPend.push(d.pending[idx]+(p));
-  });
-
   const ctx = document.getElementById('mainChart').getContext('2d');
   if(mainChart) mainChart.destroy();
-  mainChart = new Chart(ctx,{
-    type:'bar',
-    data:{
-      labels:d.labels,
-      datasets:[
-        {label:'Won', data:userWon, backgroundColor:'rgba(34,201,138,.72)',borderColor:'#22c98a',borderWidth:1,borderRadius:4,borderSkipped:false},
-        {label:'Lost',data:userLost,backgroundColor:'rgba(240,79,79,.68)', borderColor:'#f04f4f',borderWidth:1,borderRadius:4,borderSkipped:false},
-        {label:'Pending',data:userPend,backgroundColor:'rgba(245,166,35,.62)',borderColor:'#f5a623',borderWidth:1,borderRadius:4,borderSkipped:false},
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#181c24',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#eef0f4',bodyColor:'#7e8a9e',padding:12}},
-      scales:{
-        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:11,family:"'DM Mono',monospace"},color:'#444f62',maxRotation:45,autoSkip:true,maxTicksLimit:12},border:{color:'rgba(255,255,255,.07)'}},
-        y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:11,family:"'DM Mono',monospace"},color:'#444f62',stepSize:1},border:{color:'rgba(255,255,255,.07)'}}
-      }
-    }
-  });
+  mainChart = new Chart(ctx,{type:'bar',data:{labels:d.labels,datasets:[
+    {label:'Won',    data:d.won,     backgroundColor:'rgba(34,201,138,.72)', borderColor:'#22c98a',borderWidth:1,borderRadius:4,borderSkipped:false},
+    {label:'Lost',   data:d.lost,    backgroundColor:'rgba(240,79,79,.68)',  borderColor:'#f04f4f',borderWidth:1,borderRadius:4,borderSkipped:false},
+    {label:'Pending',data:d.pending, backgroundColor:'rgba(245,166,35,.62)', borderColor:'#f5a623',borderWidth:1,borderRadius:4,borderSkipped:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#181c24',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#eef0f4',bodyColor:'#7e8a9e',padding:12}},
+    scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:11,family:"'DM Mono',monospace"},color:'#444f62',maxRotation:45,autoSkip:true,maxTicksLimit:12},border:{color:'rgba(255,255,255,.07)'}},
+      y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:11,family:"'DM Mono',monospace"},color:'#444f62',stepSize:1},border:{color:'rgba(255,255,255,.07)'}}}}});
 }
 
 function renderValueChart(){
-  const d = PERIODS[period];
+  const d = buildPeriodData(period);
   const ctx = document.getElementById('valueChart').getContext('2d');
   if(valueChart) valueChart.destroy();
-  valueChart = new Chart(ctx,{
-    type:'bar',
-    data:{
-      labels:d.labels,
-      datasets:[
-        {label:'Won Value', data:d.wonVal, backgroundColor:'rgba(34,201,138,.70)',borderColor:'#22c98a',borderWidth:1,borderRadius:4,borderSkipped:false},
-        {label:'Lost Value',data:d.lostVal,backgroundColor:'rgba(240,79,79,.65)',borderColor:'#f04f4f',borderWidth:1,borderRadius:4,borderSkipped:false},
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#181c24',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#eef0f4',bodyColor:'#7e8a9e',padding:12,callbacks:{label:c=>' '+c.dataset.label+': ₱'+c.parsed.y.toFixed(1)+'M'}}},
-      scales:{
-        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:11,family:"'DM Mono',monospace"},color:'#444f62',maxRotation:45,autoSkip:true,maxTicksLimit:12},border:{color:'rgba(255,255,255,.07)'}},
-        y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:11,family:"'DM Mono',monospace"},color:'#444f62',callback:v=>'₱'+v+'M'},border:{color:'rgba(255,255,255,.07)'}}
-      }
-    }
-  });
+  valueChart = new Chart(ctx,{type:'bar',data:{labels:d.labels,datasets:[
+    {label:'Won Value', data:d.wonVal, backgroundColor:'rgba(34,201,138,.70)',borderColor:'#22c98a',borderWidth:1,borderRadius:4,borderSkipped:false},
+    {label:'Lost Value',data:d.lostVal,backgroundColor:'rgba(240,79,79,.65)', borderColor:'#f04f4f',borderWidth:1,borderRadius:4,borderSkipped:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#181c24',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#eef0f4',bodyColor:'#7e8a9e',padding:12,callbacks:{label:c=>' '+c.dataset.label+': ₱'+c.parsed.y.toFixed(1)+'M'}}},
+    scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:11,family:"'DM Mono',monospace"},color:'#444f62',maxRotation:45,autoSkip:true,maxTicksLimit:12},border:{color:'rgba(255,255,255,.07)'}},
+      y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:11,family:"'DM Mono',monospace"},color:'#444f62',callback:v=>'₱'+v+'M'},border:{color:'rgba(255,255,255,.07)'}}}}});
 }
 
 function renderDonut(){
@@ -658,30 +743,14 @@ function renderDonut(){
   const ctx = document.getElementById('donutChart').getContext('2d');
   if(donutChart) donutChart.destroy();
   const wonCounts = stats.map(s=>s.won);
-  donutChart = new Chart(ctx,{
-    type:'doughnut',
-    data:{
-      labels:CATS.map(c=>c.num+' '+c.name),
-      datasets:[{
-        data:wonCounts,
-        backgroundColor:CATS.map(c=>c.color+'cc'),
-        borderColor:CATS.map(c=>c.color),
-        borderWidth:1.5,hoverOffset:8
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,cutout:'64%',
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#181c24',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#eef0f4',bodyColor:'#7e8a9e',padding:12,
-        callbacks:{label:c=>{const sum=wonCounts.reduce((a,b)=>a+b,0);return ' '+c.label+': '+c.parsed+(sum?' ('+Math.round(c.parsed/sum*100)+'%)':'')}}
-      }}
-    }
-  });
+  donutChart = new Chart(ctx,{type:'doughnut',data:{labels:CATS.map(c=>c.num+' '+c.name),datasets:[{
+    data:wonCounts,backgroundColor:CATS.map(c=>c.color+'cc'),borderColor:CATS.map(c=>c.color),borderWidth:1.5,hoverOffset:8
+  }]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#181c24',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#eef0f4',bodyColor:'#7e8a9e',padding:12,
+      callbacks:{label:c=>{const sum=wonCounts.reduce((a,b)=>a+b,0);return ' '+c.label+': '+c.parsed+(sum?' ('+Math.round(c.parsed/sum*100)+'%)':'');}}}}}});
   const sum = wonCounts.reduce((a,b)=>a+b,0);
   document.getElementById('donutLegend').innerHTML = CATS.map((c,i)=>`
-    <span class="leg-item">
-      <span class="leg-dot" style="background:${c.color}"></span>
-      ${c.num} ${c.name.split(' ').slice(0,2).join(' ')} (${sum?Math.round(wonCounts[i]/sum*100):0}%)
-    </span>`).join('');
+    <span class="leg-item"><span class="leg-dot" style="background:${c.color}"></span>${c.num} ${c.name.split(' ').slice(0,2).join(' ')} (${sum?Math.round(wonCounts[i]/sum*100):0}%)</span>`).join('');
 }
 
 // ── RENDER TABLE ───────────────────────────────────────────────────
@@ -703,7 +772,7 @@ function renderTable(){
   };
   tbody.innerHTML = list.map(c=>{
     const cat = CATS[c.catId];
-    const d   = c.date ? new Date(c.date).toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'}) : '—';
+    const d = c.date ? new Date(c.date).toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'}) : '—';
     return `<tr>
       <td class="td-name">${c.name}</td>
       <td><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:7px;height:7px;border-radius:2px;background:${cat.color};flex-shrink:0;display:inline-block"></span>${cat.num} ${cat.name}</span></td>
@@ -718,11 +787,6 @@ function renderTable(){
 }
 
 // ── ADD / DELETE ───────────────────────────────────────────────────
-function toggleAddPanel(){
-  const p = document.getElementById('addPanel');
-  p.style.display = p.style.display==='none' ? 'block' : 'none';
-}
-
 function submitBid(){
   const name   = document.getElementById('f-name').value.trim();
   const catVal = document.getElementById('f-cat').value;
@@ -731,19 +795,17 @@ function submitBid(){
   const val    = parseFloat(document.getElementById('f-val').value)||0;
   const status = document.getElementById('f-status').value;
   const date   = document.getElementById('f-date').value;
-
   if(!name){alert('Please enter a project name.');return;}
   if(catVal===''){alert('Please select a category.');return;}
-
   contracts.push({id:uid(),name,catId:+catVal,sub,client,val,date,status});
   save();
-  // reset
   document.getElementById('f-name').value='';
   document.getElementById('f-client').value='';
   document.getElementById('f-val').value='';
   document.getElementById('f-status').value='won';
-  document.getElementById('addPanel').style.display='none';
   renderAll();
+  renderSummaryTotals(); // keep summary totals in sync too
+  showToast('Bid result saved — analytics updated ✓');
 }
 
 function deleteBid(id){
@@ -751,6 +813,222 @@ function deleteBid(id){
   contracts = contracts.filter(c=>c.id!==id);
   save();
   renderAll();
+  renderSummaryTotals();
+}
+
+// ── SUMMARY TAB ────────────────────────────────────────────────────
+
+// Compute combined (contracts + summaryData) counts per cat+sub key
+// Returns map: "catId_subIdx" -> {won, lost, pending, wonVal, lostVal}
+function getCombinedSummary(){
+  const result = {};
+  CATS.forEach(c=>{
+    c.subs.forEach((sub, si)=>{
+      const k = `${c.id}_${si}`;
+      // from contract log — match by catId and sub name
+      const cWon  = contracts.filter(x=>x.catId===c.id && x.sub===sub && x.status==='won').length;
+      const cLost = contracts.filter(x=>x.catId===c.id && x.sub===sub && x.status==='lost').length;
+      const cPend = contracts.filter(x=>x.catId===c.id && x.sub===sub && x.status==='pending').length;
+      const cWonVal = contracts.filter(x=>x.catId===c.id && x.sub===sub && x.status==='won').reduce((a,b)=>a+(b.val||0),0);
+      const cLostVal= contracts.filter(x=>x.catId===c.id && x.sub===sub && x.status==='lost').reduce((a,b)=>a+(b.val||0),0);
+      // from manual summary entries
+      const sd = summaryData[k]||{};
+      result[k] = {
+        won:     cWon  + (+sd.won     ||0),
+        lost:    cLost + (+sd.lost    ||0),
+        pending: cPend + (+sd.pending ||0),
+        wonVal:  cWonVal  + (+sd.wonVal  ||0),
+        lostVal: cLostVal + (+sd.lostVal ||0),
+      };
+    });
+  });
+  return result;
+}
+
+function renderSummaryTab(){
+  renderSummaryTotals();
+  renderSumCatGrid();
+}
+
+function renderSummaryTotals(){
+  const combined = getCombinedSummary();
+  let totalWon=0, totalLost=0, totalPend=0, totalWonVal=0;
+  Object.values(combined).forEach(d=>{
+    totalWon   += d.won;
+    totalLost  += d.lost;
+    totalPend  += d.pending;
+    totalWonVal+= d.wonVal;
+  });
+  const total = totalWon+totalLost+totalPend;
+  const wr = (totalWon+totalLost)>0 ? Math.round(totalWon/(totalWon+totalLost)*100) : 0;
+  document.getElementById('sumTotalsGrid').innerHTML = `
+    <div class="sum-total-big"><div class="sum-total-big-val" style="color:var(--text1)">${total}</div><div class="sum-total-big-lbl">Total Bids</div></div>
+    <div class="sum-total-big"><div class="sum-total-big-val" style="color:var(--win)">${totalWon}</div><div class="sum-total-big-lbl">Won</div></div>
+    <div class="sum-total-big"><div class="sum-total-big-val" style="color:var(--loss)">${totalLost}</div><div class="sum-total-big-lbl">Lost</div></div>
+    <div class="sum-total-big"><div class="sum-total-big-val" style="color:var(--pend)">${totalPend}</div><div class="sum-total-big-lbl">Pending</div></div>
+    <div class="sum-total-big"><div class="sum-total-big-val" style="color:var(--blue)">${wr}%</div><div class="sum-total-big-lbl">Win Rate</div></div>
+    <div class="sum-total-big"><div class="sum-total-big-val" style="color:var(--blue)">₱${totalWonVal.toFixed(1)}M</div><div class="sum-total-big-lbl">Won Value</div></div>
+  `;
+}
+
+function renderSumCatGrid(){
+  const combined = getCombinedSummary();
+  const grid = document.getElementById('sumCatGrid');
+  grid.innerHTML = CATS.map(c=>{
+    let catWon=0,catLost=0,catPend=0;
+    c.subs.forEach((_,si)=>{
+      const d=combined[`${c.id}_${si}`]||{};
+      catWon+=d.won||0; catLost+=d.lost||0; catPend+=d.pending||0;
+    });
+    const catTotal = catWon+catLost+catPend||1;
+    const wr = (catWon+catLost)>0?Math.round(catWon/(catWon+catLost)*100):0;
+    const wPct = Math.round(catWon/catTotal*100);
+    const lPct = Math.round(catLost/catTotal*100);
+
+    const subsHtml = c.subs.map((sub,si)=>{
+      const k=`${c.id}_${si}`;
+      const combined_d = combined[k]||{won:0,lost:0,pending:0,wonVal:0,lostVal:0};
+      // manual-only portion for the editable fields
+      const sd = summaryData[k]||{won:0,lost:0,pending:0,wonVal:0,lostVal:0};
+      // from contract log (read-only portion)
+      const cWon  = contracts.filter(x=>x.catId===c.id && x.sub===sub && x.status==='won').length;
+      const cLost = contracts.filter(x=>x.catId===c.id && x.sub===sub && x.status==='lost').length;
+      const cPend = contracts.filter(x=>x.catId===c.id && x.sub===sub && x.status==='pending').length;
+      const cWonVal = contracts.filter(x=>x.catId===c.id && x.sub===sub && x.status==='won').reduce((a,b)=>a+(b.val||0),0);
+      return `<div class="sub-input-row">
+        <div class="sub-input-label">
+          ${sub}
+          ${(cWon||cLost||cPend)?`<span style="font-size:11px;color:var(--text3);margin-left:6px">(log: ↑${cWon} ↓${cLost}${cPend?' ⏳'+cPend:''})</span>`:''}
+        </div>
+        <div class="sub-input-group">
+          <label style="color:var(--win)">Won</label>
+          <input type="number" min="0" class="win-input" value="${sd.won||''}" placeholder="${cWon||'0'}"
+            onchange="updateSummary(${c.id},${si},'won',this.value)" oninput="updateSummary(${c.id},${si},'won',this.value)"/>
+        </div>
+        <div class="sub-input-group">
+          <label style="color:var(--loss)">Lost</label>
+          <input type="number" min="0" class="loss-input" value="${sd.lost||''}" placeholder="${cLost||'0'}"
+            onchange="updateSummary(${c.id},${si},'lost',this.value)" oninput="updateSummary(${c.id},${si},'lost',this.value)"/>
+        </div>
+        <div class="sub-input-group">
+          <label style="color:var(--pend)">Pending</label>
+          <input type="number" min="0" class="pend-input" value="${sd.pending||''}" placeholder="${cPend||'0'}"
+            onchange="updateSummary(${c.id},${si},'pending',this.value)" oninput="updateSummary(${c.id},${si},'pending',this.value)"/>
+        </div>
+        <div class="sub-input-group">
+          <label>Won Val (₱M)</label>
+          <input type="number" min="0" step="0.1" value="${sd.wonVal||''}" placeholder="${cWonVal?cWonVal.toFixed(1):'0.0'}"
+            onchange="updateSummary(${c.id},${si},'wonVal',this.value)" oninput="updateSummary(${c.id},${si},'wonVal',this.value)"/>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="sum-cat-card" id="sumcat-${c.id}">
+      <div class="sum-cat-head" onclick="toggleSumCat(${c.id})">
+        <div class="sum-cat-color" style="background:${c.color}"></div>
+        <div class="sum-cat-info">
+          <div class="sum-cat-title">${c.num} ${c.name}</div>
+          <div class="sum-cat-stats">
+            <span class="sum-cat-stat w">Won: ${catWon}</span>
+            <span class="sum-cat-stat l">Lost: ${catLost}</span>
+            <span class="sum-cat-stat p">Pending: ${catPend}</span>
+            <span class="sum-cat-stat r">Win rate: ${wr}%</span>
+          </div>
+          <div class="sum-wl-bar" style="margin-top:6px">
+            <div class="sum-wl-bar-win" style="width:${wPct}%"></div>
+            <div class="sum-wl-bar-loss" style="width:${lPct}%"></div>
+          </div>
+        </div>
+        <div class="sum-cat-chevron" id="chev-${c.id}">▼</div>
+      </div>
+      <div class="sum-cat-body" id="sumbody-${c.id}">
+        <div style="margin-bottom:12px">
+          <div style="display:grid;grid-template-columns:1fr 90px 90px 90px 80px;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px">
+            <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Sub-product / Item</div>
+            <div style="font-size:11px;font-weight:600;color:var(--win);text-transform:uppercase;letter-spacing:.05em;text-align:center">Won</div>
+            <div style="font-size:11px;font-weight:600;color:var(--loss);text-transform:uppercase;letter-spacing:.05em;text-align:center">Lost</div>
+            <div style="font-size:11px;font-weight:600;color:var(--pend);text-transform:uppercase;letter-spacing:.05em;text-align:center">Pending</div>
+            <div style="font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;text-align:center">Won ₱M</div>
+          </div>
+          <div class="sub-input-list">${subsHtml}</div>
+        </div>
+        <div class="sum-cat-footer" id="sumfoot-${c.id}">
+          <div class="sum-cat-totals">
+            <span class="sum-total-item w">Total Won: <strong>${catWon}</strong></span>
+            <span class="sum-total-item l">Total Lost: <strong>${catLost}</strong></span>
+            <span class="sum-total-item p">Total Pending: <strong>${catPend}</strong></span>
+          </div>
+          <button class="sum-save-btn" onclick="saveCatSummary(${c.id})">✓ Save Category</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSumCat(catId){
+  const body = document.getElementById(`sumbody-${catId}`);
+  const chev = document.getElementById(`chev-${catId}`);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function updateSummary(catId, subIdx, field, val){
+  const k = `${catId}_${subIdx}`;
+  if(!summaryData[k]) summaryData[k]={won:0,lost:0,pending:0,wonVal:0,lostVal:0};
+  summaryData[k][field] = parseFloat(val)||0;
+  // live-update footer totals using combined data
+  const combined = getCombinedSummary();
+  const c = CATS[catId];
+  let cWon=0,cLost=0,cPend=0;
+  c.subs.forEach((_,si)=>{
+    const d=combined[`${catId}_${si}`]||{};
+    cWon+=d.won||0; cLost+=d.lost||0; cPend+=d.pending||0;
+  });
+  const foot = document.getElementById(`sumfoot-${catId}`);
+  if(foot){
+    const tots = foot.querySelector('.sum-cat-totals');
+    if(tots) tots.innerHTML=`
+      <span class="sum-total-item w">Total Won: <strong>${cWon}</strong></span>
+      <span class="sum-total-item l">Total Lost: <strong>${cLost}</strong></span>
+      <span class="sum-total-item p">Total Pending: <strong>${cPend}</strong></span>`;
+  }
+}
+
+function saveCatSummary(catId){
+  saveSummary();
+  const c = CATS[catId];
+  const combined = getCombinedSummary();
+  let cWon=0,cLost=0,cPend=0;
+  c.subs.forEach((_,si)=>{
+    const d=combined[`${catId}_${si}`]||{};
+    cWon+=d.won||0; cLost+=d.lost||0; cPend+=d.pending||0;
+  });
+  const total=cWon+cLost+cPend||1;
+  const wr=(cWon+cLost)>0?Math.round(cWon/(cWon+cLost)*100):0;
+  const wPct=Math.round(cWon/total*100), lPct=Math.round(cLost/total*100);
+  const head = document.querySelector(`#sumcat-${catId} .sum-cat-stats`);
+  if(head) head.innerHTML=`
+    <span class="sum-cat-stat w">Won: ${cWon}</span>
+    <span class="sum-cat-stat l">Lost: ${cLost}</span>
+    <span class="sum-cat-stat p">Pending: ${cPend}</span>
+    <span class="sum-cat-stat r">Win rate: ${wr}%</span>`;
+  const bar = document.querySelector(`#sumcat-${catId} .sum-wl-bar`);
+  if(bar){
+    bar.querySelector('.sum-wl-bar-win').style.width=wPct+'%';
+    bar.querySelector('.sum-wl-bar-loss').style.width=lPct+'%';
+  }
+  renderSummaryTotals();
+  renderMetrics(); renderGauge(); renderCatSummary();
+  renderMainChart(); renderValueChart(); renderDonut();
+  showToast(`${c.num} ${c.name} saved — analytics updated ✓`);
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
 }
 
 // ── RENDER ALL ─────────────────────────────────────────────────────
