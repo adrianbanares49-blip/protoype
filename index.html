@@ -109,6 +109,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0
 .btn-danger{background:var(--loss-d);color:var(--loss);border-color:var(--loss-b)}
 .btn-danger:hover{background:rgba(240,79,79,.2)}
 
+/* ── TABLE with z-index isolation fix ── */
+.table-scroll-wrap{overflow-x:auto;position:relative}
 .ctable{width:100%;border-collapse:collapse;font-size:13px}
 .ctable th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);white-space:nowrap}
 .ctable td{padding:11px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
@@ -186,7 +188,7 @@ footer p{font-size:12px;color:var(--text3)}
 .sum-total-big-val{font-size:30px;font-weight:600;font-family:'DM Mono',monospace}
 .sum-total-big-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
 
-.toast{position:fixed;bottom:28px;right:28px;background:#181c24;border:1px solid var(--win-b);color:var(--win);font-size:13px;padding:12px 18px;border-radius:var(--r-md);z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+.toast{position:fixed;bottom:28px;right:28px;background:#181c24;border:1px solid var(--win-b);color:var(--win);font-size:13px;padding:12px 18px;border-radius:var(--r-md);z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
 .toast.show{opacity:1;transform:translateY(0)}
 
 .sum-wl-bar{display:flex;width:100%;height:5px;border-radius:5px;overflow:hidden;margin-top:6px}
@@ -204,7 +206,18 @@ footer p{font-size:12px;color:var(--text3)}
 
 .multiselect-count{display:inline-flex;align-items:center;justify-content:center;background:var(--blue);color:#fff;font-size:10px;font-weight:600;border-radius:10px;padding:1px 6px;min-width:18px;flex-shrink:0;font-family:'DM Mono',monospace}
 
-.multiselect-dropdown{position:absolute;top:calc(100% + 6px);left:0;min-width:100%;background:var(--bg-card2);border:1px solid var(--border-h);border-radius:var(--r-md);box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:200;overflow:hidden;animation:dropIn .15s ease}
+/* ── FIX: dropdown rendered in a portal overlay so it's never clipped by overflow:auto ── */
+.multiselect-dropdown-portal{
+  position:fixed;
+  background:var(--bg-card2);
+  border:1px solid var(--border-h);
+  border-radius:var(--r-md);
+  box-shadow:0 8px 32px rgba(0,0,0,.6);
+  z-index:8000;
+  overflow:hidden;
+  animation:dropIn .15s ease;
+  min-width:220px;
+}
 @keyframes dropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 
 .multiselect-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid var(--border)}
@@ -213,7 +226,7 @@ footer p{font-size:12px;color:var(--text3)}
 .multiselect-action-btn{font-family:'DM Sans',sans-serif;font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;padding:2px 4px;border-radius:4px;transition:background .15s}
 .multiselect-action-btn:hover{background:var(--blue-d)}
 
-.multiselect-options{padding:6px}
+.multiselect-options{padding:6px;max-height:240px;overflow-y:auto}
 .multiselect-option{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r-sm);cursor:pointer;transition:background .15s;user-select:none}
 .multiselect-option:hover{background:rgba(255,255,255,.04)}
 .multiselect-option.selected{background:rgba(46,124,246,.08)}
@@ -231,8 +244,11 @@ footer p{font-size:12px;color:var(--text3)}
 .multiselect-apply-btn{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:6px 14px;border-radius:var(--r-sm);border:none;background:var(--blue);color:#fff;cursor:pointer;transition:background .2s}
 .multiselect-apply-btn:hover{background:#1a5fd6}
 
-/* active filter badge on trigger */
 .multiselect-trigger.has-selection{border-color:rgba(46,124,246,.4);color:var(--text1)}
+
+/* Card header row needs overflow:visible so dropdowns aren't clipped */
+.card-hdr{overflow:visible}
+.log-filter-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:relative;z-index:100}
 </style>
 </head>
 <body>
@@ -385,23 +401,11 @@ footer p{font-size:12px;color:var(--text3)}
         </div>
         <div class="form-group">
           <label>Product Category</label>
+          <!-- Form multi-select trigger — portal-based -->
           <div class="multiselect-wrap" id="formCatWrap" style="min-width:unset;width:100%">
             <div class="multiselect-trigger" id="formCatTrigger" onclick="toggleFormCatSelect()" style="min-width:unset;width:100%">
               <span class="multiselect-trigger-text" id="formCatLabel">Select category...</span>
               <span class="multiselect-arrow">▼</span>
-            </div>
-            <div class="multiselect-dropdown" id="formCatDropdown" style="display:none;width:100%">
-              <div class="multiselect-header">
-                <span class="multiselect-header-lbl">Select Categories</span>
-                <div class="multiselect-actions">
-                  <button class="multiselect-action-btn" onclick="formCatSelectAll(event)">All</button>
-                  <button class="multiselect-action-btn" onclick="formCatClearAll(event)">None</button>
-                </div>
-              </div>
-              <div class="multiselect-options" id="formCatOptions"></div>
-              <div class="multiselect-footer">
-                <button class="multiselect-apply-btn" onclick="applyFormCat()">Apply</button>
-              </div>
             </div>
           </div>
         </div>
@@ -442,28 +446,15 @@ footer p{font-size:12px;color:var(--text3)}
         <div class="card-title">Contract Bid Log</div>
         <div class="card-sub" id="logCount">All entries</div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <!-- MULTI-SELECT CATEGORY FILTER -->
+      <div class="log-filter-row">
+        <!-- MULTI-SELECT CATEGORY FILTER — portal-based -->
         <div class="multiselect-wrap" id="catMultiWrap">
           <div class="multiselect-trigger" id="catMultiTrigger" onclick="toggleMultiSelect()">
             <span class="multiselect-trigger-text" id="catMultiLabel">All Categories</span>
             <span class="multiselect-arrow">▼</span>
           </div>
-          <div class="multiselect-dropdown" id="catMultiDropdown" style="display:none">
-            <div class="multiselect-header">
-              <span class="multiselect-header-lbl">Filter by Category</span>
-              <div class="multiselect-actions">
-                <button class="multiselect-action-btn" onclick="selectAllCats(event)">All</button>
-                <button class="multiselect-action-btn" onclick="clearAllCats(event)">None</button>
-              </div>
-            </div>
-            <div class="multiselect-options" id="catMultiOptions"></div>
-            <div class="multiselect-footer">
-              <button class="multiselect-apply-btn" onclick="applyAndClose()">Apply</button>
-            </div>
-          </div>
         </div>
-        <!-- STATUS FILTER (unchanged) -->
+        <!-- STATUS FILTER -->
         <select id="filterStatus" class="btn btn-ghost" style="font-size:12px;padding:6px 12px;cursor:pointer;background:var(--bg-input);border:1px solid var(--border);color:var(--text2)" onchange="renderTable()">
           <option value="">All Status</option>
           <option value="won">Won</option>
@@ -472,7 +463,8 @@ footer p{font-size:12px;color:var(--text3)}
         </select>
       </div>
     </div>
-    <div style="overflow-x:auto">
+    <!-- overflow-x:auto is now on its own element, not a parent of the dropdown -->
+    <div class="table-scroll-wrap">
       <table class="ctable">
         <thead>
           <tr>
@@ -495,9 +487,12 @@ footer p{font-size:12px;color:var(--text3)}
 
 <footer>
   <p>© 2024 BidTracker · Industrial Automation & SCADA · All data is stored locally in your browser</p>
-  <span class="footer-tag">v3.1.0 · bidding-analytics</span>
+  <span class="footer-tag">v3.2.0 · bidding-analytics</span>
 </footer>
 </div>
+
+<!-- PORTAL: all multiselect dropdowns are rendered here, outside any overflow container -->
+<div id="ms-portal"></div>
 
 <div class="toast" id="toast"></div>
 
@@ -566,180 +561,259 @@ function saveSummary(){localStorage.setItem('bidtracker_summary',JSON.stringify(
 let period='monthly';
 let mainChart,valueChart,donutChart;
 
-// ── MULTI-SELECT STATE ──
-// null = all selected (show all), otherwise Set of catId numbers
-let selectedCats = null; // null means "All"
+/* ═══════════════════════════════════════════════════════════
+   PORTAL-BASED MULTISELECT
+   Dropdowns are appended to #ms-portal (fixed, z:8000) and
+   positioned with getBoundingClientRect so they are never
+   clipped by overflow:auto/hidden parents.
+   ═══════════════════════════════════════════════════════════ */
 
-function buildMultiSelectOptions(){
-  const container = document.getElementById('catMultiOptions');
-  container.innerHTML = CATS.map(c=>`
-    <div class="multiselect-option${selectedCats===null||selectedCats.has(c.id)?' selected':''}" 
-         id="ms-opt-${c.id}" onclick="toggleCatOption(${c.id},this)">
+// ── LOG FILTER multiselect state ──
+let selectedCats = null; // null = all
+
+// ── FORM multiselect state ──
+let formSelectedCats = new Set();
+
+// Active portal dropdown id
+let activePortalId = null;
+
+function getPortal(){return document.getElementById('ms-portal');}
+
+function openPortalDropdown(id, triggerEl, buildFn, applyFn){
+  // Close any existing portal dropdown
+  closeAllPortalDropdowns();
+
+  const portal = getPortal();
+  const dd = document.createElement('div');
+  dd.className = 'multiselect-dropdown-portal';
+  dd.id = 'portal-dd-'+id;
+  dd.innerHTML = buildFn();
+  portal.appendChild(dd);
+  activePortalId = id;
+
+  // Position it below the trigger
+  positionPortalDropdown(dd, triggerEl);
+
+  // Mark trigger as open
+  triggerEl.classList.add('open');
+}
+
+function positionPortalDropdown(dd, triggerEl){
+  const rect = triggerEl.getBoundingClientRect();
+  const ddW = Math.max(rect.width, 220);
+  let left = rect.left;
+  let top = rect.bottom + 6;
+
+  // Keep within viewport
+  if(left + ddW > window.innerWidth - 8) left = window.innerWidth - ddW - 8;
+  if(top + 300 > window.innerHeight) top = rect.top - 6; // flip up (approximate)
+
+  dd.style.left = left + 'px';
+  dd.style.top = top + 'px';
+  dd.style.width = ddW + 'px';
+}
+
+function closeAllPortalDropdowns(){
+  const portal = getPortal();
+  portal.innerHTML = '';
+  activePortalId = null;
+  // Reset all trigger open states
+  document.querySelectorAll('.multiselect-trigger.open').forEach(t=>t.classList.remove('open'));
+}
+
+// Close when clicking outside
+document.addEventListener('click', function(e){
+  if(!activePortalId) return;
+  const dd = document.getElementById('portal-dd-'+activePortalId);
+  // Check if click is inside any trigger or the portal dropdown
+  const triggers = document.querySelectorAll('.multiselect-trigger');
+  let insideTrigger = false;
+  triggers.forEach(t=>{if(t.contains(e.target)) insideTrigger=true;});
+  if(dd && !dd.contains(e.target) && !insideTrigger){
+    // Apply & close
+    if(activePortalId === 'logCat') applyLogCat();
+    if(activePortalId === 'formCat') applyFormCat();
+    closeAllPortalDropdowns();
+  }
+}, true);
+
+// Reposition on scroll/resize
+window.addEventListener('scroll', function(){
+  if(!activePortalId) return;
+  const dd = document.getElementById('portal-dd-'+activePortalId);
+  const triggerId = activePortalId === 'logCat' ? 'catMultiTrigger' : 'formCatTrigger';
+  const triggerEl = document.getElementById(triggerId);
+  if(dd && triggerEl) positionPortalDropdown(dd, triggerEl);
+}, true);
+
+/* ── LOG CATEGORY FILTER ── */
+
+function buildLogCatDropdownHTML(){
+  const opts = CATS.map(c=>`
+    <div class="multiselect-option${selectedCats===null||selectedCats.has(c.id)?' selected':''}"
+         onclick="logCatToggle(${c.id},this)">
+      <div class="ms-checkbox"><span class="ms-check">✓</span></div>
+      <span class="ms-color-dot" style="background:${c.color}"></span>
+      <span class="ms-option-label">${c.num} ${c.name}</span>
+    </div>`).join('');
+  return `
+    <div class="multiselect-header">
+      <span class="multiselect-header-lbl">Filter by Category</span>
+      <div class="multiselect-actions">
+        <button class="multiselect-action-btn" onclick="logCatSelectAll(event)">All</button>
+        <button class="multiselect-action-btn" onclick="logCatClearAll(event)">None</button>
+      </div>
+    </div>
+    <div class="multiselect-options">${opts}</div>
+    <div class="multiselect-footer">
+      <button class="multiselect-apply-btn" onclick="applyLogCatClose()">Apply</button>
+    </div>`;
+}
+
+function toggleMultiSelect(){
+  if(activePortalId === 'logCat'){applyLogCat();closeAllPortalDropdowns();return;}
+  const trigger = document.getElementById('catMultiTrigger');
+  openPortalDropdown('logCat', trigger, buildLogCatDropdownHTML, applyLogCat);
+}
+
+function logCatToggle(catId, el){
+  if(selectedCats===null) selectedCats = new Set(CATS.map(c=>c.id));
+  if(selectedCats.has(catId)) selectedCats.delete(catId);
+  else selectedCats.add(catId);
+  if(selectedCats.size===CATS.length) selectedCats=null;
+  // Re-render options inside portal
+  const dd = document.getElementById('portal-dd-logCat');
+  if(dd){
+    const optsCont = dd.querySelector('.multiselect-options');
+    if(optsCont) optsCont.innerHTML = CATS.map(c=>`
+      <div class="multiselect-option${selectedCats===null||selectedCats.has(c.id)?' selected':''}"
+           onclick="logCatToggle(${c.id},this)">
+        <div class="ms-checkbox"><span class="ms-check">✓</span></div>
+        <span class="ms-color-dot" style="background:${c.color}"></span>
+        <span class="ms-option-label">${c.num} ${c.name}</span>
+      </div>`).join('');
+  }
+}
+
+function logCatSelectAll(e){
+  e.stopPropagation();
+  selectedCats=null;
+  logCatRefreshOptions();
+}
+function logCatClearAll(e){
+  e.stopPropagation();
+  selectedCats=new Set();
+  logCatRefreshOptions();
+}
+function logCatRefreshOptions(){
+  const dd = document.getElementById('portal-dd-logCat');
+  if(!dd) return;
+  const optsCont = dd.querySelector('.multiselect-options');
+  if(optsCont) optsCont.innerHTML = CATS.map(c=>`
+    <div class="multiselect-option${selectedCats===null||selectedCats.has(c.id)?' selected':''}"
+         onclick="logCatToggle(${c.id},this)">
       <div class="ms-checkbox"><span class="ms-check">✓</span></div>
       <span class="ms-color-dot" style="background:${c.color}"></span>
       <span class="ms-option-label">${c.num} ${c.name}</span>
     </div>`).join('');
 }
 
-function toggleMultiSelect(){
-  const dropdown=document.getElementById('catMultiDropdown');
-  const trigger=document.getElementById('catMultiTrigger');
-  const isOpen=dropdown.style.display!=='none';
-  if(isOpen){dropdown.style.display='none';trigger.classList.remove('open');}
-  else{buildMultiSelectOptions();dropdown.style.display='block';trigger.classList.add('open');}
-}
+function applyLogCat(){updateLogCatLabel();renderTable();}
+function applyLogCatClose(){applyLogCat();closeAllPortalDropdowns();}
 
-function toggleCatOption(catId, el){
-  // On first interaction, if selectedCats is null (all), initialise to all selected
-  if(selectedCats===null) selectedCats=new Set(CATS.map(c=>c.id));
-  if(selectedCats.has(catId)){selectedCats.delete(catId);}
-  else{selectedCats.add(catId);}
-  // if all selected, treat as null
-  if(selectedCats.size===CATS.length) selectedCats=null;
-  el.classList.toggle('selected', selectedCats===null||selectedCats.has(catId));
-  // update all options in case we reset to null
-  buildMultiSelectOptions();
-}
-
-function selectAllCats(e){
-  e.stopPropagation();
-  selectedCats=null;
-  buildMultiSelectOptions();
-}
-
-function clearAllCats(e){
-  e.stopPropagation();
-  selectedCats=new Set();
-  buildMultiSelectOptions();
-}
-
-function applyAndClose(){
-  const dropdown=document.getElementById('catMultiDropdown');
-  const trigger=document.getElementById('catMultiTrigger');
-  dropdown.style.display='none';
-  trigger.classList.remove('open');
-  updateMultiSelectLabel();
-  renderTable();
-}
-
-function updateMultiSelectLabel(){
+function updateLogCatLabel(){
   const trigger=document.getElementById('catMultiTrigger');
   const label=document.getElementById('catMultiLabel');
+  removeCountBadge(trigger);
   if(selectedCats===null||selectedCats.size===CATS.length){
     label.textContent='All Categories';
     trigger.classList.remove('has-selection');
-    // remove count badge if exists
-    const existing=trigger.querySelector('.multiselect-count');
-    if(existing) existing.remove();
   } else if(selectedCats.size===0){
     label.textContent='No Categories';
     trigger.classList.add('has-selection');
-    setCountBadge(trigger,0);
+    addCountBadge(trigger,0);
   } else if(selectedCats.size===1){
     const cat=CATS.find(c=>selectedCats.has(c.id));
     label.textContent=cat.num+' '+cat.name.split(' ').slice(0,2).join(' ');
     trigger.classList.add('has-selection');
-    setCountBadge(trigger,1);
   } else {
     label.textContent=selectedCats.size+' categories';
     trigger.classList.add('has-selection');
-    setCountBadge(trigger,selectedCats.size);
+    addCountBadge(trigger,selectedCats.size);
   }
 }
 
-function setCountBadge(trigger, count){
-  let badge=trigger.querySelector('.multiselect-count');
-  if(!badge){
-    badge=document.createElement('span');
-    badge.className='multiselect-count';
-    trigger.insertBefore(badge, trigger.querySelector('.multiselect-arrow'));
-  }
-  badge.textContent=count;
-}
+/* ── FORM CATEGORY MULTISELECT ── */
 
-// Close dropdown when clicking outside
-document.addEventListener('click',function(e){
-  const wrap=document.getElementById('catMultiWrap');
-  if(wrap&&!wrap.contains(e.target)){
-    const dropdown=document.getElementById('catMultiDropdown');
-    const trigger=document.getElementById('catMultiTrigger');
-    if(dropdown&&dropdown.style.display!=='none'){
-      dropdown.style.display='none';
-      trigger.classList.remove('open');
-      updateMultiSelectLabel();
-      renderTable();
-    }
-  }
-});
-
-// ── INIT ──
-document.getElementById('currentDate').textContent=new Date().toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
-document.getElementById('f-date').value=new Date().toISOString().slice(0,10);
-
-// ── FORM CATEGORY MULTI-SELECT ──
-let formSelectedCats = new Set();
-
-function buildFormCatOptions(){
-  const container=document.getElementById('formCatOptions');
-  container.innerHTML=CATS.map(c=>`
+function buildFormCatDropdownHTML(){
+  const opts = CATS.map(c=>`
     <div class="multiselect-option${formSelectedCats.has(c.id)?' selected':''}"
-         id="fms-opt-${c.id}" onclick="toggleFormCatOption(${c.id},this)">
+         onclick="formCatToggle(${c.id},this)">
+      <div class="ms-checkbox"><span class="ms-check">✓</span></div>
+      <span class="ms-color-dot" style="background:${c.color}"></span>
+      <span class="ms-option-label">${c.num} ${c.name}</span>
+    </div>`).join('');
+  return `
+    <div class="multiselect-header">
+      <span class="multiselect-header-lbl">Select Categories</span>
+      <div class="multiselect-actions">
+        <button class="multiselect-action-btn" onclick="formCatSelectAll(event)">All</button>
+        <button class="multiselect-action-btn" onclick="formCatClearAll(event)">None</button>
+      </div>
+    </div>
+    <div class="multiselect-options">${opts}</div>
+    <div class="multiselect-footer">
+      <button class="multiselect-apply-btn" onclick="applyFormCatClose()">Apply</button>
+    </div>`;
+}
+
+function toggleFormCatSelect(){
+  if(activePortalId === 'formCat'){applyFormCat();closeAllPortalDropdowns();return;}
+  const trigger = document.getElementById('formCatTrigger');
+  openPortalDropdown('formCat', trigger, buildFormCatDropdownHTML, applyFormCat);
+}
+
+function formCatToggle(catId, el){
+  if(formSelectedCats.has(catId)) formSelectedCats.delete(catId);
+  else formSelectedCats.add(catId);
+  formCatRefreshOptions();
+}
+function formCatSelectAll(e){
+  e.stopPropagation();
+  formSelectedCats=new Set(CATS.map(c=>c.id));
+  formCatRefreshOptions();
+}
+function formCatClearAll(e){
+  e.stopPropagation();
+  formSelectedCats=new Set();
+  formCatRefreshOptions();
+}
+function formCatRefreshOptions(){
+  const dd = document.getElementById('portal-dd-formCat');
+  if(!dd) return;
+  const optsCont = dd.querySelector('.multiselect-options');
+  if(optsCont) optsCont.innerHTML = CATS.map(c=>`
+    <div class="multiselect-option${formSelectedCats.has(c.id)?' selected':''}"
+         onclick="formCatToggle(${c.id},this)">
       <div class="ms-checkbox"><span class="ms-check">✓</span></div>
       <span class="ms-color-dot" style="background:${c.color}"></span>
       <span class="ms-option-label">${c.num} ${c.name}</span>
     </div>`).join('');
 }
 
-function toggleFormCatSelect(){
-  const dd=document.getElementById('formCatDropdown');
-  const tr=document.getElementById('formCatTrigger');
-  const isOpen=dd.style.display!=='none';
-  if(isOpen){dd.style.display='none';tr.classList.remove('open');}
-  else{buildFormCatOptions();dd.style.display='block';tr.classList.add('open');}
-}
-
-function toggleFormCatOption(catId,el){
-  if(formSelectedCats.has(catId)) formSelectedCats.delete(catId);
-  else formSelectedCats.add(catId);
-  buildFormCatOptions();
-}
-
-function formCatSelectAll(e){
-  e.stopPropagation();
-  formSelectedCats=new Set(CATS.map(c=>c.id));
-  buildFormCatOptions();
-}
-
-function formCatClearAll(e){
-  e.stopPropagation();
-  formSelectedCats=new Set();
-  buildFormCatOptions();
-}
-
-function applyFormCat(){
-  const dd=document.getElementById('formCatDropdown');
-  const tr=document.getElementById('formCatTrigger');
-  dd.style.display='none';tr.classList.remove('open');
-  updateFormCatLabel();
-  updateFormSubOptions();
-}
+function applyFormCat(){updateFormCatLabel();updateFormSubOptions();}
+function applyFormCatClose(){applyFormCat();closeAllPortalDropdowns();}
 
 function updateFormCatLabel(){
   const tr=document.getElementById('formCatTrigger');
   const lbl=document.getElementById('formCatLabel');
+  removeCountBadge(tr);
   const n=formSelectedCats.size;
-  if(n===0){lbl.textContent='Select category...';tr.classList.remove('has-selection');removeFormCatBadge(tr);}
-  else if(n===CATS.length){lbl.textContent='All Categories';tr.classList.add('has-selection');setFormCatBadge(tr,n);}
-  else if(n===1){const c=CATS.find(x=>formSelectedCats.has(x.id));lbl.textContent=c.num+' '+c.name;tr.classList.add('has-selection');removeFormCatBadge(tr);}
-  else{lbl.textContent=n+' categories selected';tr.classList.add('has-selection');setFormCatBadge(tr,n);}
+  if(n===0){lbl.textContent='Select category...';tr.classList.remove('has-selection');}
+  else if(n===CATS.length){lbl.textContent='All Categories';tr.classList.add('has-selection');addCountBadge(tr,n);}
+  else if(n===1){const c=CATS.find(x=>formSelectedCats.has(x.id));lbl.textContent=c.num+' '+c.name;tr.classList.add('has-selection');}
+  else{lbl.textContent=n+' categories selected';tr.classList.add('has-selection');addCountBadge(tr,n);}
 }
-
-function setFormCatBadge(tr,n){
-  let b=tr.querySelector('.multiselect-count');
-  if(!b){b=document.createElement('span');b.className='multiselect-count';tr.insertBefore(b,tr.querySelector('.multiselect-arrow'));}
-  b.textContent=n;
-}
-function removeFormCatBadge(tr){const b=tr.querySelector('.multiselect-count');if(b)b.remove();}
 
 function updateFormSubOptions(){
   const sel=document.getElementById('f-sub');
@@ -753,15 +827,19 @@ function updateFormSubOptions(){
   sel.innerHTML=opts.join('');
 }
 
-// Close form dropdown on outside click
-document.addEventListener('click',function(e){
-  const wrap=document.getElementById('formCatWrap');
-  if(wrap&&!wrap.contains(e.target)){
-    const dd=document.getElementById('formCatDropdown');
-    const tr=document.getElementById('formCatTrigger');
-    if(dd&&dd.style.display!=='none'){dd.style.display='none';tr.classList.remove('open');updateFormCatLabel();updateFormSubOptions();}
-  }
-});
+/* ── BADGE HELPERS ── */
+function addCountBadge(trigger, count){
+  let badge=trigger.querySelector('.multiselect-count');
+  if(!badge){badge=document.createElement('span');badge.className='multiselect-count';trigger.insertBefore(badge,trigger.querySelector('.multiselect-arrow'));}
+  badge.textContent=count;
+}
+function removeCountBadge(trigger){const b=trigger.querySelector('.multiselect-count');if(b)b.remove();}
+
+/* ═══════════════════════════════════════════════════════════
+   PERIOD TABS
+   ═══════════════════════════════════════════════════════════ */
+document.getElementById('currentDate').textContent=new Date().toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
+document.getElementById('f-date').value=new Date().toISOString().slice(0,10);
 
 document.querySelectorAll('.period-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
@@ -778,13 +856,14 @@ document.querySelectorAll('.main-tab').forEach(tab=>{
     document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+    closeAllPortalDropdowns();
     if(tab.dataset.tab==='analytics') renderAll();
     if(tab.dataset.tab==='summary') renderSummaryTab();
     if(tab.dataset.tab==='log') renderTable();
   });
 });
 
-// ── HELPERS ──
+/* ── HELPERS ── */
 function catStats(){
   const combined=getCombinedSummary();
   return CATS.map(c=>{
@@ -897,7 +976,6 @@ function renderDonut(){
 function renderTable(){
   const filterStatus=document.getElementById('filterStatus').value;
   let list=[...contracts].reverse();
-  // Apply multi-select category filter
   if(selectedCats!==null&&selectedCats.size<CATS.length){
     list=list.filter(c=>selectedCats.has(c.catId));
   }
@@ -937,19 +1015,16 @@ function submitBid(){
   const date=document.getElementById('f-date').value;
   if(!name){alert('Please enter a project name.');return;}
   if(formSelectedCats.size===0){alert('Please select at least one category.');return;}
-  // Parse catId and sub from the combined f-sub value "catId||subName"
   let catId, sub;
   if(subVal && subVal.includes('||')){
     const parts=subVal.split('||');
     catId=+parts[0]; sub=parts[1];
   } else {
-    // fallback: use first selected cat, no sub
     catId=[...formSelectedCats][0]; sub=subVal||'';
   }
   if(formSelectedCats.size===1){
     contracts.push({id:uid(),name,catId,sub,client,val,date,status});
   } else {
-    // Multiple categories selected: save one entry per category
     formSelectedCats.forEach(cid=>{
       const cat=CATS[cid];
       const firstSub=cat?cat.subs[0]:'';
@@ -961,13 +1036,11 @@ function submitBid(){
   document.getElementById('f-client').value='';
   document.getElementById('f-val').value='';
   document.getElementById('f-status').value='won';
-  // Reset form category selector
   formSelectedCats=new Set();
   updateFormCatLabel();
   updateFormSubOptions();
   renderAll();
   renderSummaryTotals();
-  const n=formSelectedCats.size;
   showToast('Bid result saved — analytics updated ✓');
 }
 
