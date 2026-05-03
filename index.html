@@ -1,874 +1,770 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Bidding Contracts Analytics — Industrial Automation & SCADA</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BidTracker — Products & Services Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #0b0e13;
-    --bg-card: #111318;
-    --bg-card2: #181c24;
-    --border: rgba(255,255,255,0.07);
-    --border-hover: rgba(255,255,255,0.13);
-    --text-primary: #eef0f4;
-    --text-secondary: #7e8a9e;
-    --text-muted: #444f62;
-    --win: #22c98a;
-    --win-dim: rgba(34,201,138,0.12);
-    --win-border: rgba(34,201,138,0.22);
-    --loss: #f04f4f;
-    --loss-dim: rgba(240,79,79,0.10);
-    --loss-border: rgba(240,79,79,0.22);
-    --pending: #f5a623;
-    --pending-dim: rgba(245,166,35,0.10);
-    --accent: #2e7cf6;
-    --accent-dim: rgba(46,124,246,0.12);
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 16px;
-  }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text-primary);
-    min-height: 100vh;
-    font-size: 15px;
-    line-height: 1.6;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
-    background-size: 52px 52px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .page { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 0 24px 64px; }
-
-  /* NAV */
-  nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 0;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 36px;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .nav-brand { display: flex; align-items: center; gap: 12px; }
-
-  .brand-icon {
-    width: 38px; height: 38px;
-    background: linear-gradient(135deg, #1a4fa0, #2e7cf6);
-    border-radius: var(--radius-sm);
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  .brand-icon svg { width: 20px; height: 20px; fill: #fff; }
-  .brand-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
-  .brand-sub { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
-
-  .nav-right { display: flex; align-items: center; gap: 10px; }
-
-  .nav-pill {
-    font-size: 12px; padding: 5px 12px;
-    border-radius: 20px; border: 1px solid var(--border);
-    color: var(--text-secondary); background: transparent;
-    font-family: 'DM Mono', monospace;
-  }
-
-  .live-badge {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 12px; color: var(--win);
-    background: var(--win-dim); padding: 5px 12px;
-    border-radius: 20px; border: 1px solid var(--win-border);
-  }
-
-  .live-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--win);
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%,100% { opacity:1; transform:scale(1); }
-    50% { opacity:0.45; transform:scale(0.8); }
-  }
-
-  /* PAGE HEADER */
-  .page-header {
-    display: flex; align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 28px;
-    flex-wrap: wrap; gap: 16px;
-  }
-
-  .page-header h1 {
-    font-size: 26px; font-weight: 600;
-    letter-spacing: -0.03em; line-height: 1.2;
-  }
-
-  .page-header p {
-    font-size: 13px; color: var(--text-secondary);
-    margin-top: 6px; max-width: 500px; line-height: 1.5;
-  }
-
-  .period-tabs {
-    display: flex; background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md); padding: 4px; gap: 2px;
-    align-self: flex-start;
-  }
-
-  .period-btn {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px; font-weight: 500;
-    padding: 7px 18px; border-radius: 7px;
-    border: none; cursor: pointer;
-    background: transparent; color: var(--text-secondary);
-    transition: all 0.2s ease;
-  }
-
-  .period-btn:hover { color: var(--text-primary); }
-
-  .period-btn.active {
-    background: var(--accent); color: #fff;
-    box-shadow: 0 2px 10px rgba(46,124,246,0.35);
-  }
-
-  /* METRIC CARDS */
-  .metrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
-    gap: 14px; margin-bottom: 24px;
-  }
-
-  .metric-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 20px 22px;
-    transition: border-color 0.2s;
-    animation: fadeUp 0.4s ease both;
-  }
-
-  .metric-card:hover { border-color: var(--border-hover); }
-  .metric-card:nth-child(1) { animation-delay:0.05s; }
-  .metric-card:nth-child(2) { animation-delay:0.10s; }
-  .metric-card:nth-child(3) { animation-delay:0.15s; }
-  .metric-card:nth-child(4) { animation-delay:0.20s; }
-  .metric-card:nth-child(5) { animation-delay:0.25s; }
-
-  @keyframes fadeUp {
-    from { opacity:0; transform:translateY(10px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
-
-  .metric-label {
-    font-size: 11px; font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px;
-  }
-
-  .metric-value {
-    font-size: 26px; font-weight: 600;
-    letter-spacing: -0.03em;
-    font-family: 'DM Mono', monospace;
-  }
-
-  .metric-value.win  { color: var(--win); }
-  .metric-value.loss { color: var(--loss); }
-  .metric-value.acc  { color: var(--accent); }
-  .metric-value.norm { color: var(--text-primary); }
-  .metric-value.pend { color: var(--pending); }
-
-  .metric-change {
-    font-size: 12px; margin-top: 8px;
-    display: flex; align-items: center; gap: 5px; font-weight: 500;
-  }
-
-  .metric-change.up   { color: var(--win); }
-  .metric-change.down { color: var(--loss); }
-  .metric-change.neutral { color: var(--text-muted); }
-
-  /* CARDS */
-  .chart-row   { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px; }
-  .chart-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-  .chart-row-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
-
-  @media (max-width: 760px) {
-    .chart-row-2, .chart-row-3 { grid-template-columns: 1fr; }
-  }
-
-  .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 24px;
-    transition: border-color 0.2s;
-    animation: fadeUp 0.45s ease both;
-    animation-delay: 0.3s;
-  }
-
-  .card:hover { border-color: var(--border-hover); }
-
-  .card-header {
-    display: flex; align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
-  }
-
-  .card-title {
-    font-size: 15px; font-weight: 600;
-    color: var(--text-primary); letter-spacing: -0.01em;
-  }
-
-  .card-sub { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
-
-  .card-badge {
-    font-size: 11px; padding: 4px 10px;
-    border-radius: 20px;
-    background: var(--accent-dim); color: var(--accent);
-    border: 1px solid rgba(46,124,246,0.2);
-    font-weight: 500; white-space: nowrap;
-  }
-
-  /* LEGEND */
-  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; }
-
-  .legend-item {
-    display: flex; align-items: center; gap: 7px;
-    font-size: 12px; color: var(--text-secondary);
-  }
-
-  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
-
-  /* WIN/LOSS BAR */
-  .wl-bar-wrap {
-    display: flex; width: 100%; height: 10px;
-    border-radius: 8px; overflow: hidden; margin: 10px 0 6px;
-  }
-
-  .wl-bar-win  { background: var(--win);  height: 100%; transition: width 0.6s ease; }
-  .wl-bar-loss { background: var(--loss); height: 100%; transition: width 0.6s ease; }
-
-  /* CATEGORY ROWS */
-  .cat-list { list-style: none; }
-
-  .cat-item {
-    padding: 13px 0;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .cat-item:last-child { border-bottom: none; }
-
-  .cat-top {
-    display: flex; align-items: center;
-    justify-content: space-between; margin-bottom: 8px; gap: 10px;
-  }
-
-  .cat-name-wrap { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
-
-  .cat-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-
-  .cat-name {
-    font-size: 13px; font-weight: 500;
-    color: var(--text-primary);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-
-  .cat-stats { display: flex; gap: 14px; align-items: center; flex-shrink: 0; }
-
-  .cat-stat { font-size: 12px; font-family: 'DM Mono', monospace; }
-  .cat-stat.w { color: var(--win); }
-  .cat-stat.l { color: var(--loss); }
-  .cat-stat.r { color: var(--text-secondary); }
-
-  /* CONTRACTS TABLE */
-  .ctable { width: 100%; border-collapse: collapse; font-size: 13px; }
-
-  .ctable th {
-    text-align: left; padding: 8px 12px;
-    font-size: 11px; font-weight: 600;
-    color: var(--text-muted); text-transform: uppercase;
-    letter-spacing: 0.05em; border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-
-  .ctable td {
-    padding: 11px 12px; border-bottom: 1px solid var(--border);
-    color: var(--text-secondary); vertical-align: middle;
-  }
-
-  .ctable tr:last-child td { border-bottom: none; }
-  .ctable tr:hover td { background: rgba(255,255,255,0.018); }
-
-  .ctable .td-name { color: var(--text-primary); font-weight: 500; }
-
-  .status-chip {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 11px; padding: 3px 9px;
-    border-radius: 20px; font-weight: 600;
-    white-space: nowrap;
-  }
-
-  .status-chip.won  { background: var(--win-dim);     color: var(--win);     border: 1px solid var(--win-border); }
-  .status-chip.lost { background: var(--loss-dim);    color: var(--loss);    border: 1px solid var(--loss-border); }
-  .status-chip.pend { background: var(--pending-dim); color: var(--pending); border: 1px solid rgba(245,166,35,0.22); }
-
-  .chip-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-
-  /* GAUGE CARD */
-  .gauge-wrap {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 10px 0 4px;
-  }
-
-  .gauge-number {
-    font-size: 52px; font-weight: 600;
-    font-family: 'DM Mono', monospace;
-    letter-spacing: -0.04em;
-    line-height: 1;
-  }
-
-  .gauge-label {
-    font-size: 12px; color: var(--text-secondary); margin-top: 8px;
-  }
-
-  .gauge-sub {
-    margin-top: 18px; width: 100%;
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .gauge-sub-item {
-    background: var(--bg-card2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 12px 14px; text-align: center;
-  }
-
-  .gauge-sub-val { font-size: 18px; font-weight: 600; font-family: 'DM Mono', monospace; }
-  .gauge-sub-lbl { font-size: 11px; color: var(--text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
-
-  /* FOOTER */
-  footer {
-    margin-top: 48px; padding-top: 20px;
-    border-top: 1px solid var(--border);
-    display: flex; align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap; gap: 10px;
-  }
-
-  footer p { font-size: 12px; color: var(--text-muted); }
-
-  .footer-tag {
-    font-size: 11px; font-family: 'DM Mono', monospace;
-    color: var(--text-muted); background: var(--bg-card);
-    border: 1px solid var(--border);
-    padding: 4px 10px; border-radius: 20px;
-  }
-
-  .canvas-wrap { position: relative; width: 100%; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0e13;--bg-card:#111318;--bg-card2:#181c24;--bg-input:#0f1218;
+  --border:rgba(255,255,255,0.07);--border-h:rgba(255,255,255,0.13);
+  --text1:#eef0f4;--text2:#7e8a9e;--text3:#444f62;
+  --win:#22c98a;--win-d:rgba(34,201,138,0.12);--win-b:rgba(34,201,138,0.25);
+  --loss:#f04f4f;--loss-d:rgba(240,79,79,0.10);--loss-b:rgba(240,79,79,0.25);
+  --pend:#f5a623;--pend-d:rgba(245,166,35,0.10);--pend-b:rgba(245,166,35,0.25);
+  --blue:#2e7cf6;--blue-d:rgba(46,124,246,0.12);
+  --r-sm:6px;--r-md:10px;--r-lg:16px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text1);min-height:100vh;font-size:15px;line-height:1.6}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:52px 52px;pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:0 24px 80px}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--border);margin-bottom:32px;flex-wrap:wrap;gap:12px}
+.nav-brand{display:flex;align-items:center;gap:12px}
+.brand-icon{width:38px;height:38px;background:linear-gradient(135deg,#1a4fa0,#2e7cf6);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center}
+.brand-icon svg{width:20px;height:20px;fill:#fff}
+.brand-name{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.brand-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.nav-r{display:flex;align-items:center;gap:10px}
+.nav-pill{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);color:var(--text2);background:transparent;font-family:'DM Mono',monospace}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--win);background:var(--win-d);padding:5px 12px;border-radius:20px;border:1px solid var(--win-b)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--win);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* PAGE HEADER */
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px}
+.page-hdr h1{font-size:26px;font-weight:600;letter-spacing:-.03em;line-height:1.2}
+.page-hdr p{font-size:13px;color:var(--text2);margin-top:6px;max-width:540px;line-height:1.5}
+.period-tabs{display:flex;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:4px;gap:2px;align-self:flex-start}
+.period-btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:7px 18px;border-radius:7px;border:none;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s}
+.period-btn:hover{color:var(--text1)}
+.period-btn.active{background:var(--blue);color:#fff;box-shadow:0 2px 10px rgba(46,124,246,.35)}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:14px;margin-bottom:24px}
+.metric-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;transition:border-color .2s;animation:fadeUp .4s ease both}
+.metric-card:hover{border-color:var(--border-h)}
+.metric-card:nth-child(1){animation-delay:.05s}.metric-card:nth-child(2){animation-delay:.1s}.metric-card:nth-child(3){animation-delay:.15s}.metric-card:nth-child(4){animation-delay:.2s}.metric-card:nth-child(5){animation-delay:.25s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.metric-lbl{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.metric-val{font-size:26px;font-weight:600;letter-spacing:-.03em;font-family:'DM Mono',monospace}
+.metric-val.win{color:var(--win)}.metric-val.loss{color:var(--loss)}.metric-val.pend{color:var(--pend)}.metric-val.blue{color:var(--blue)}.metric-val.norm{color:var(--text1)}
+.metric-chg{font-size:12px;margin-top:6px;color:var(--text3)}
+.metric-chg.up{color:var(--win)}.metric-chg.down{color:var(--loss)}
+
+/* CARDS */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;transition:border-color .2s;animation:fadeUp .45s ease both;animation-delay:.3s}
+.card:hover{border-color:var(--border-h)}
+.card-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.card-title{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.card-sub{font-size:12px;color:var(--text2);margin-top:3px}
+.card-badge{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--blue-d);color:var(--blue);border:1px solid rgba(46,124,246,.22);font-weight:500;white-space:nowrap;align-self:flex-start}
+
+.row1{display:grid;grid-template-columns:1fr;gap:20px;margin-bottom:20px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.row3{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px}
+@media(max-width:780px){.row2,.row3{grid-template-columns:1fr}}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:16px}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* CATEGORY TABS */
+.cat-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.cat-tab{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
+.cat-tab:hover{color:var(--text1);border-color:var(--border-h)}
+.cat-tab.active{color:#fff;border-color:transparent}
+
+/* WL BAR */
+.wl-bar-wrap{display:flex;width:100%;height:8px;border-radius:8px;overflow:hidden;margin:8px 0 4px}
+.wl-bar-win{background:var(--win);height:100%;transition:width .6s ease}
+.wl-bar-loss{background:var(--loss);height:100%;transition:width .6s ease}
+
+/* CATEGORY SUMMARY LIST */
+.cat-sum-list{list-style:none}
+.cat-sum-item{padding:13px 0;border-bottom:1px solid var(--border)}
+.cat-sum-item:last-child{border-bottom:none}
+.cat-sum-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;gap:8px;flex-wrap:wrap}
+.cat-sum-name{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.cat-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.cat-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-badges{display:flex;gap:10px;flex-shrink:0}
+.cat-badge{font-size:11px;font-family:'DM Mono',monospace;font-weight:500}
+.cat-badge.w{color:var(--win)}.cat-badge.l{color:var(--loss)}.cat-badge.r{color:var(--text2)}
+
+/* ADD FORM */
+.add-panel{background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px;margin-bottom:24px;animation:fadeUp .35s ease both}
+.add-panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.add-panel-title{font-size:14px;font-weight:600}
+.add-panel-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px}
+.form-group label{display:block;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-md);color:var(--text1);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue)}
+.form-group select option{background:#181c24}
+.form-btns{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:9px 20px;border-radius:var(--r-md);border:1px solid var(--border);cursor:pointer;transition:all .2s}
+.btn-ghost{background:transparent;color:var(--text2)}
+.btn-ghost:hover{color:var(--text1);border-color:var(--border-h)}
+.btn-win{background:var(--win-d);color:var(--win);border-color:var(--win-b)}
+.btn-win:hover{background:rgba(34,201,138,.2)}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-primary:hover{background:#1a5fd6}
+
+/* CONTRACTS TABLE */
+.ctable{width:100%;border-collapse:collapse;font-size:13px}
+.ctable th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);white-space:nowrap}
+.ctable td{padding:11px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+.ctable tr:last-child td{border-bottom:none}
+.ctable tr:hover td{background:rgba(255,255,255,.018)}
+.ctable .td-name{color:var(--text1);font-weight:500}
+.status-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap}
+.chip-won{background:var(--win-d);color:var(--win);border:1px solid var(--win-b)}
+.chip-lost{background:var(--loss-d);color:var(--loss);border:1px solid var(--loss-b)}
+.chip-pending{background:var(--pend-d);color:var(--pend);border:1px solid var(--pend-b)}
+.chip-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.del-btn{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:2px 6px;border-radius:4px;transition:color .2s}
+.del-btn:hover{color:var(--loss)}
+
+/* GAUGE */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 0 0}
+.gauge-num{font-size:54px;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:-.04em;line-height:1}
+.gauge-lbl{font-size:12px;color:var(--text2);margin-top:6px}
+.gauge-sub{margin-top:16px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gauge-sub-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--r-md);padding:11px 14px;text-align:center}
+.gauge-sub-val{font-size:18px;font-weight:600;font-family:'DM Mono',monospace}
+.gauge-sub-lbl{font-size:11px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.05em}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px}
+
+/* FOOTER */
+footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+footer p{font-size:12px;color:var(--text3)}
+.footer-tag{font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);background:var(--bg-card);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
+
+.canvas-wrap{position:relative;width:100%}
 </style>
 </head>
 <body>
-
 <div class="page">
 
-  <!-- NAV -->
-  <nav>
-    <div class="nav-brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 24 24"><path d="M9 11H7v9h2v-9zm4-4h-2v13h2V7zm4-4h-2v17h2V3zm2 19H5V3H3v21h18v-2z"/></svg>
-      </div>
-      <div>
-        <div class="brand-name">BidTracker</div>
-        <div class="brand-sub">Industrial Automation & SCADA Contracts</div>
-      </div>
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24"><path d="M9 11H7v9h2v-9zm4-4h-2v13h2V7zm4-4h-2v17h2V3zm2 19H5V3H3v21h18v-2z"/></svg>
     </div>
-    <div class="nav-right">
-      <span class="nav-pill" id="currentDate"></span>
-      <span class="live-badge"><span class="live-dot"></span>Live</span>
-    </div>
-  </nav>
-
-  <!-- PAGE HEADER -->
-  <div class="page-header">
     <div>
-      <h1>Bidding Contracts Analytics</h1>
-      <p>Win/loss tracking across all product categories — Instrumentation, Automation & SCADA, Pumps & Motors, Electromechanical Equipment, Water Disinfection Chemicals, and WTP &amp; WWTP Process Equipment.</p>
-    </div>
-    <div class="period-tabs">
-      <button class="period-btn active" data-period="monthly">Monthly</button>
-      <button class="period-btn" data-period="quarterly">Quarterly</button>
-      <button class="period-btn" data-period="yearly">Yearly</button>
+      <div class="brand-name">BidTracker</div>
+      <div class="brand-sub">Products & Services — Bidding Contracts Analytics</div>
     </div>
   </div>
+  <div class="nav-r">
+    <span class="nav-pill" id="currentDate"></span>
+    <span class="live-badge"><span class="live-dot"></span>Live</span>
+  </div>
+</nav>
 
-  <!-- METRICS -->
-  <div class="metrics" id="metrics"></div>
+<!-- PAGE HEADER -->
+<div class="page-hdr">
+  <div>
+    <h1>Bidding Contracts Analytics</h1>
+    <p>Win/loss tracking across all 5 product &amp; service categories. Add new contract results per category and monitor performance over time.</p>
+  </div>
+  <div class="period-tabs">
+    <button class="period-btn active" data-period="monthly">Monthly</button>
+    <button class="period-btn" data-period="quarterly">Quarterly</button>
+    <button class="period-btn" data-period="yearly">Yearly</button>
+  </div>
+</div>
 
-  <!-- MAIN GROUPED BAR CHART -->
-  <div class="chart-row">
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Bids Won vs. Lost</div>
-          <div class="card-sub" id="chart-sub">Number of contracts per period</div>
-        </div>
-        <span class="card-badge" id="period-label">2024 Overview</span>
+<!-- SUMMARY METRICS -->
+<div class="metrics" id="metricsEl"></div>
+
+<!-- OVERALL WIN/LOSS BAR CHART -->
+<div class="row1">
+  <div class="card">
+    <div class="card-hdr">
+      <div>
+        <div class="card-title">Overall Bids Won vs. Lost</div>
+        <div class="card-sub" id="chart-sub">All categories combined</div>
       </div>
-      <div class="legend">
-        <span class="legend-item"><span class="legend-dot" style="background:var(--win)"></span>Contracts Won</span>
-        <span class="legend-item"><span class="legend-dot" style="background:var(--loss)"></span>Contracts Lost</span>
-        <span class="legend-item"><span class="legend-dot" style="background:var(--pending)"></span>Pending</span>
-      </div>
-      <div class="canvas-wrap" style="height: 320px;">
-        <canvas id="mainChart" role="img" aria-label="Grouped bar chart of bids won and lost per period"></canvas>
-      </div>
+      <span class="card-badge" id="period-label">2024 Monthly</span>
+    </div>
+    <div class="legend">
+      <span class="leg-item"><span class="leg-dot" style="background:var(--win)"></span>Won</span>
+      <span class="leg-item"><span class="leg-dot" style="background:var(--loss)"></span>Lost</span>
+      <span class="leg-item"><span class="leg-dot" style="background:var(--pend)"></span>Pending</span>
+    </div>
+    <div class="canvas-wrap" style="height:300px">
+      <canvas id="mainChart" role="img" aria-label="Bar chart of overall bids won and lost per period"></canvas>
     </div>
   </div>
+</div>
 
-  <!-- CONTRACT VALUE + WIN RATE -->
-  <div class="chart-row-3">
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Contract Value — Won vs. Lost</div>
-          <div class="card-sub">Total contract value in ₱ millions</div>
-        </div>
-      </div>
-      <div class="legend">
-        <span class="legend-item"><span class="legend-dot" style="background:var(--win)"></span>Won Value</span>
-        <span class="legend-item"><span class="legend-dot" style="background:var(--loss)"></span>Lost Value</span>
-      </div>
-      <div class="canvas-wrap" style="height: 280px;">
-        <canvas id="valueChart" role="img" aria-label="Bar chart of contract value won vs lost"></canvas>
+<!-- BY CATEGORY + WIN RATE -->
+<div class="row3">
+  <div class="card">
+    <div class="card-hdr">
+      <div>
+        <div class="card-title">Win/Loss by Product Category</div>
+        <div class="card-sub">All 5 product &amp; service lines</div>
       </div>
     </div>
-
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Win Rate</div>
-          <div class="card-sub">Overall bid success rate</div>
-        </div>
+    <ul class="cat-sum-list" id="catSumList"></ul>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <div>
+        <div class="card-title">Overall Win Rate</div>
+        <div class="card-sub">Bid success rate</div>
       </div>
-      <div class="gauge-wrap">
-        <div class="gauge-number" id="winRateNum" style="color:var(--win)">—</div>
-        <div class="gauge-label">Win Rate (by count)</div>
-        <div class="wl-bar-wrap" style="margin-top:20px;">
-          <div class="wl-bar-win" id="winBar" style="width:0%"></div>
-          <div class="wl-bar-loss" id="lossBar" style="width:0%"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;width:100%;margin-top:4px;">
-          <span id="winCountLabel">Won: —</span>
-          <span id="lossCountLabel">Lost: —</span>
-        </div>
-        <div class="gauge-sub">
-          <div class="gauge-sub-item">
-            <div class="gauge-sub-val" style="color:var(--win)" id="gs-won">—</div>
-            <div class="gauge-sub-lbl">Total Won</div>
-          </div>
-          <div class="gauge-sub-item">
-            <div class="gauge-sub-val" style="color:var(--loss)" id="gs-lost">—</div>
-            <div class="gauge-sub-lbl">Total Lost</div>
-          </div>
-          <div class="gauge-sub-item">
-            <div class="gauge-sub-val" style="color:var(--pending)" id="gs-pend">—</div>
-            <div class="gauge-sub-lbl">Pending</div>
-          </div>
-          <div class="gauge-sub-item">
-            <div class="gauge-sub-val" style="color:var(--accent)" id="gs-val">—</div>
-            <div class="gauge-sub-lbl">Won Value</div>
-          </div>
-        </div>
+    </div>
+    <div class="gauge-wrap">
+      <div class="gauge-num" id="gaugeNum" style="color:var(--win)">—</div>
+      <div class="gauge-lbl">Win Rate (decided bids)</div>
+      <div class="wl-bar-wrap" style="margin-top:18px;height:10px">
+        <div class="wl-bar-win" id="winBar" style="width:0%"></div>
+        <div class="wl-bar-loss" id="lossBar" style="width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;width:100%;margin-top:4px">
+        <span id="winCountLbl">Won: —</span>
+        <span id="lossCountLbl">Lost: —</span>
+      </div>
+      <div class="gauge-sub">
+        <div class="gauge-sub-item"><div class="gauge-sub-val" style="color:var(--win)" id="gs-won">—</div><div class="gauge-sub-lbl">Won</div></div>
+        <div class="gauge-sub-item"><div class="gauge-sub-val" style="color:var(--loss)" id="gs-lost">—</div><div class="gauge-sub-lbl">Lost</div></div>
+        <div class="gauge-sub-item"><div class="gauge-sub-val" style="color:var(--pend)" id="gs-pend">—</div><div class="gauge-sub-lbl">Pending</div></div>
+        <div class="gauge-sub-item"><div class="gauge-sub-val" style="color:var(--blue)" id="gs-total">—</div><div class="gauge-sub-lbl">Total</div></div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- BY CATEGORY + DONUT -->
-  <div class="chart-row-2">
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Win/Loss by Product Category</div>
-          <div class="card-sub">Breakdown across all 6 product lines</div>
-        </div>
+<!-- CONTRACT VALUE CHART + DONUT -->
+<div class="row2">
+  <div class="card">
+    <div class="card-hdr">
+      <div>
+        <div class="card-title">Contract Value — Won vs. Lost</div>
+        <div class="card-sub">₱ millions per period</div>
       </div>
-      <ul class="cat-list" id="catList"></ul>
     </div>
-
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Won Contracts — Category Share</div>
-          <div class="card-sub">Proportion of wins per product line</div>
-        </div>
-      </div>
-      <div class="canvas-wrap" style="height: 240px;">
-        <canvas id="donutChart" role="img" aria-label="Donut chart of won contracts share by product line"></canvas>
-      </div>
-      <div class="legend" id="donut-legend" style="margin-top:16px;justify-content:center;"></div>
+    <div class="legend">
+      <span class="leg-item"><span class="leg-dot" style="background:var(--win)"></span>Won Value</span>
+      <span class="leg-item"><span class="leg-dot" style="background:var(--loss)"></span>Lost Value</span>
+    </div>
+    <div class="canvas-wrap" style="height:260px">
+      <canvas id="valueChart" role="img" aria-label="Bar chart of contract values won vs lost"></canvas>
     </div>
   </div>
-
-  <!-- RECENT CONTRACTS TABLE -->
-  <div class="chart-row">
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Recent Contract Bids</div>
-          <div class="card-sub">Latest bidding activity across all categories</div>
-        </div>
-        <span class="card-badge">Sample Data</span>
-      </div>
-      <div style="overflow-x:auto;">
-        <table class="ctable">
-          <thead>
-            <tr>
-              <th>Contract / Project</th>
-              <th>Category</th>
-              <th>Client</th>
-              <th>Bid Value</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Margin</th>
-            </tr>
-          </thead>
-          <tbody id="contractsTable"></tbody>
-        </table>
+  <div class="card">
+    <div class="card-hdr">
+      <div>
+        <div class="card-title">Won Bids — Category Share</div>
+        <div class="card-sub">Proportion of wins per line</div>
       </div>
     </div>
+    <div class="canvas-wrap" style="height:210px">
+      <canvas id="donutChart" role="img" aria-label="Donut chart of won bids by category"></canvas>
+    </div>
+    <div class="legend" id="donutLegend" style="margin-top:14px;justify-content:center"></div>
   </div>
+</div>
 
-  <footer>
-    <p>© 2024 BidTracker — Industrial Automation & SCADA · Sample Data Only</p>
-    <span class="footer-tag">v1.0.0 · bidding-analytics</span>
-  </footer>
+<!-- ADD CONTRACT SECTION -->
+<div class="card" style="margin-bottom:20px">
+  <div class="card-hdr">
+    <div>
+      <div class="card-title">Add Contract Bid Result</div>
+      <div class="card-sub">Record a new winning or losing bid to any product category</div>
+    </div>
+    <button class="btn btn-win" onclick="toggleAddPanel()">+ Add Bid</button>
+  </div>
+  <div id="addPanel" style="display:none">
+    <div style="border-top:1px solid var(--border);margin-bottom:18px"></div>
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:span 2">
+        <label>Contract / Project Name</label>
+        <input type="text" id="f-name" placeholder="e.g. MWSS Water Treatment Plant Upgrade"/>
+      </div>
+      <div class="form-group">
+        <label>Product Category</label>
+        <select id="f-cat">
+          <option value="">Select category...</option>
+          <option value="0">1.0 Electro-Mechanical</option>
+          <option value="1">2.0 Control & Monitoring</option>
+          <option value="2">3.0 Water Treatment & Filtration</option>
+          <option value="3">4.0 Power Generation System</option>
+          <option value="4">5.0 Water Treatment Chemicals</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Sub-product / Item</label>
+        <select id="f-sub"></select>
+      </div>
+      <div class="form-group">
+        <label>Client / Agency</label>
+        <input type="text" id="f-client" placeholder="e.g. MWSS, Meralco, DPWH"/>
+      </div>
+      <div class="form-group">
+        <label>Bid Value (₱ millions)</label>
+        <input type="number" id="f-val" placeholder="0.0" min="0" step="0.1"/>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="f-status">
+          <option value="won">Won</option>
+          <option value="lost">Lost</option>
+          <option value="pending">Pending</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="f-date"/>
+      </div>
+    </div>
+    <div class="form-btns">
+      <button class="btn btn-ghost" onclick="toggleAddPanel()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitBid()">Save Bid Result</button>
+    </div>
+  </div>
+</div>
 
+<!-- CONTRACT LOG TABLE -->
+<div class="row1">
+  <div class="card">
+    <div class="card-hdr">
+      <div>
+        <div class="card-title">Contract Bid Log</div>
+        <div class="card-sub" id="logCount">All entries</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="filterCat" class="btn btn-ghost" style="font-size:12px;padding:6px 12px;cursor:pointer" onchange="renderTable()">
+          <option value="">All Categories</option>
+          <option value="0">1.0 Electro-Mechanical</option>
+          <option value="1">2.0 Control & Monitoring</option>
+          <option value="2">3.0 Water Treatment & Filtration</option>
+          <option value="3">4.0 Power Generation</option>
+          <option value="4">5.0 Water Treatment Chemicals</option>
+        </select>
+        <select id="filterStatus" class="btn btn-ghost" style="font-size:12px;padding:6px 12px;cursor:pointer" onchange="renderTable()">
+          <option value="">All Status</option>
+          <option value="won">Won</option>
+          <option value="lost">Lost</option>
+          <option value="pending">Pending</option>
+        </select>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="ctable">
+        <thead>
+          <tr>
+            <th>Project / Contract</th>
+            <th>Category</th>
+            <th>Sub-product</th>
+            <th>Client</th>
+            <th>Bid Value</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="contractsBody"></tbody>
+      </table>
+    </div>
+    <div id="emptyState" class="empty" style="display:none">No entries match the current filter.</div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2024 BidTracker · Industrial Automation & SCADA · All data is stored locally in your browser</p>
+  <span class="footer-tag">v2.0.0 · bidding-analytics</span>
+</footer>
 </div>
 
 <script>
-  document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
+// ── DATA DEFINITIONS ──────────────────────────────────────────────
+const CATS = [
+  {
+    id:0, num:'1.0', name:'Electro-Mechanical', color:'#2e7cf6',
+    subs:['Submersible Pumps & Motors','Transfer & Booster Pumps','Solenoid & Motor Driven Dosing Pumps','G.I. FRP/GRP Panel Water Tanks','uPVC Column/Riser Pipes']
+  },
+  {
+    id:1, num:'2.0', name:'Control & Monitoring', color:'#22c98a',
+    subs:['Variable Frequency Inverter Drives (VFD)','Programmable Logic Controller (PLC)','GSM Motor Controller','Human Machine Interface (HMI)','Quarter & Multi Turn Electric Actuators','Automatic Transfer Switch (ATS)','District Metering Area','SCADA']
+  },
+  {
+    id:2, num:'3.0', name:'Water Treatment & Filtration', color:'#f5a623',
+    subs:['Sand Filter & Filtration System','Ion Exchange Media Filtration System','Sand Filter Media Purification System','Water Quality Analysis Meter']
+  },
+  {
+    id:3, num:'4.0', name:'Power Generation System', color:'#c46ef0',
+    subs:['Diesel Power Generating Set','Off/On Grid Solar Power Generating System','Vertical Axis Wind Turbine Power Generating System']
+  },
+  {
+    id:4, num:'5.0', name:'Water Treatment Chemicals', color:'#f04f4f',
+    subs:['Chlorine Dioxide Powder','Chlorine Granules','Sequestration Additives','Poly Aluminum Chloride (PAC)']
+  },
+];
 
-  const CATS = [
-    { name: 'Instrumentation & Controls', short: 'Instruments', color: '#2e7cf6' },
-    { name: 'Automation & SCADA',          short: 'SCADA',       color: '#22c98a' },
-    { name: 'Pumps & Motors',              short: 'Pumps',        color: '#f5a623' },
-    { name: 'Electromechanical Equip.',    short: 'Electromech',  color: '#c46ef0' },
-    { name: 'Water Disinfection Chemicals',short: 'Chemicals',    color: '#f04f4f' },
-    { name: 'WTP & WWTP Process Equip.',   short: 'Process Equip',color: '#38bdf8' },
+// ── PERIOD DATA (sample baseline) ────────────────────────────────
+const PERIODS = {
+  monthly:{
+    labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    sub:'Jan – Dec 2024',label:'2024 Monthly',
+    won:    [4,3,5,6,4,7,5,8,6,7,8,9],
+    lost:   [3,4,3,2,4,3,4,3,3,2,3,2],
+    pending:[1,1,2,1,2,1,1,2,1,2,1,2],
+    wonVal: [12,10,15,18,13,20,16,22,19,21,24,27],
+    lostVal:[8,11,9,7,12,9,11,8,9,7,9,6],
+  },
+  quarterly:{
+    labels:['Q1 2023','Q2 2023','Q3 2023','Q4 2023','Q1 2024','Q2 2024','Q3 2024','Q4 2024'],
+    sub:'Q1 2023 – Q4 2024',label:'Quarterly View',
+    won:    [14,17,18,20,12,17,19,24],
+    lost:   [9,8,7,6,10,9,10,8],
+    pending:[3,4,3,4,4,4,4,6],
+    wonVal: [37,46,50,55,35,51,57,74],
+    lostVal:[24,22,19,16,28,25,28,22],
+  },
+  yearly:{
+    labels:['2020','2021','2022','2023','2024'],
+    sub:'2020 – 2024',label:'5-Year Overview',
+    won:    [38,44,55,69,72],
+    lost:   [28,25,22,30,45],
+    pending:[8,10,12,14,30],
+    wonVal: [95,118,148,187,217],
+    lostVal:[70,65,58,72,106],
+  }
+};
+
+// ── SAMPLE CONTRACTS ─────────────────────────────────────────────
+let contracts = JSON.parse(localStorage.getItem('bidtracker_contracts') || 'null') || [
+  {id:uid(),name:'MWSS Water Treatment Upgrade',catId:2,sub:'Sand Filter & Filtration System',client:'MWSS',val:18.4,date:'2024-12-10',status:'won'},
+  {id:uid(),name:'Meralco SCADA Monitoring System',catId:1,sub:'SCADA',client:'Meralco',val:14.2,date:'2024-12-05',status:'won'},
+  {id:uid(),name:'PNOC Pump Station Overhaul',catId:0,sub:'Transfer & Booster Pumps',client:'PNOC',val:9.6,date:'2024-11-28',status:'lost'},
+  {id:uid(),name:'DOH Chlorination Equipment',catId:4,sub:'Chlorine Dioxide Powder',client:'DOH',val:6.1,date:'2024-11-20',status:'won'},
+  {id:uid(),name:'NPC Control Instrumentation',catId:1,sub:'Programmable Logic Controller (PLC)',client:'NPC',val:22.0,date:'2024-11-14',status:'pending'},
+  {id:uid(),name:'DPWH Electromechanical Gate Systems',catId:0,sub:'G.I. FRP/GRP Panel Water Tanks',client:'DPWH',val:11.8,date:'2024-11-08',status:'lost'},
+  {id:uid(),name:'Manila Water Level Sensors',catId:1,sub:'Human Machine Interface (HMI)',client:'Manila Water',val:7.5,date:'2024-10-30',status:'won'},
+  {id:uid(),name:'BSP HVAC Motor Controls',catId:0,sub:'Submersible Pumps & Motors',client:'BSP',val:5.3,date:'2024-10-22',status:'won'},
+  {id:uid(),name:'LLDA WWTP Process Equipment',catId:2,sub:'Ion Exchange Media Filtration System',client:'LLDA',val:16.7,date:'2024-10-15',status:'pending'},
+  {id:uid(),name:'Maynilad Pump Replacement',catId:0,sub:'Submersible Pumps & Motors',client:'Maynilad',val:13.4,date:'2024-10-08',status:'won'},
+  {id:uid(),name:'PPA Port Automation & Control',catId:1,sub:'SCADA',client:'PPA',val:19.5,date:'2024-09-28',status:'lost'},
+  {id:uid(),name:'Cagayan WD Chlorination Supply',catId:4,sub:'Chlorine Granules',client:'CAWD',val:4.2,date:'2024-09-20',status:'won'},
+  {id:uid(),name:'NPC Solar Power Integration',catId:3,sub:'Off/On Grid Solar Power Generating System',client:'NPC',val:31.0,date:'2024-09-12',status:'won'},
+  {id:uid(),name:'NWRB VFD Retrofit Program',catId:1,sub:'Variable Frequency Inverter Drives (VFD)',client:'NWRB',val:8.9,date:'2024-08-30',status:'lost'},
+  {id:uid(),name:'MWCI Dosing Pump Supply',catId:0,sub:'Solenoid & Motor Driven Dosing Pumps',client:'MWCI',val:3.7,date:'2024-08-15',status:'won'},
+];
+
+function uid(){return Math.random().toString(36).slice(2,9)}
+function save(){localStorage.setItem('bidtracker_contracts',JSON.stringify(contracts))}
+
+// ── STATE ──────────────────────────────────────────────────────────
+let period = 'monthly';
+let mainChart, valueChart, donutChart;
+
+// ── INIT ───────────────────────────────────────────────────────────
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
+document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+
+// populate sub-product dropdown on cat change
+document.getElementById('f-cat').addEventListener('change', function(){
+  const cat = CATS[+this.value];
+  const sel = document.getElementById('f-sub');
+  sel.innerHTML = cat ? cat.subs.map(s=>`<option value="${s}">${s}</option>`).join('') : '<option value="">—</option>';
+});
+
+// period tabs
+document.querySelectorAll('.period-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    period = btn.dataset.period;
+    renderAll();
+  });
+});
+
+// ── HELPERS ────────────────────────────────────────────────────────
+function catStats(){
+  return CATS.map(c=>({
+    won:     contracts.filter(x=>x.catId===c.id && x.status==='won').length,
+    lost:    contracts.filter(x=>x.catId===c.id && x.status==='lost').length,
+    pending: contracts.filter(x=>x.catId===c.id && x.status==='pending').length,
+    wonVal:  contracts.filter(x=>x.catId===c.id && x.status==='won').reduce((a,b)=>a+b.val,0),
+  }));
+}
+
+function globalStats(){
+  const won     = contracts.filter(x=>x.status==='won').length;
+  const lost    = contracts.filter(x=>x.status==='lost').length;
+  const pending = contracts.filter(x=>x.status==='pending').length;
+  const total   = won+lost+pending;
+  const wonVal  = contracts.filter(x=>x.status==='won').reduce((a,b)=>a+b.val,0);
+  const lostVal = contracts.filter(x=>x.status==='lost').reduce((a,b)=>a+b.val,0);
+  const wr = (won+lost)>0 ? Math.round(won/(won+lost)*100) : 0;
+  return {won,lost,pending,total,wonVal,lostVal,wr};
+}
+
+// ── RENDER METRICS ─────────────────────────────────────────────────
+function renderMetrics(){
+  const s = globalStats();
+  const defs = [
+    {lbl:'Total Bids',    val:s.total,   cls:'norm', chg:'All categories',           dir:''},
+    {lbl:'Contracts Won', val:s.won,     cls:'win',  chg:`Win rate: ${s.wr}%`,       dir:'up'},
+    {lbl:'Contracts Lost',val:s.lost,    cls:'loss', chg:'Review recommended',        dir:'down'},
+    {lbl:'Pending',       val:s.pending, cls:'pend', chg:'Awaiting decision',         dir:''},
+    {lbl:'Won Value',     val:'₱'+s.wonVal.toFixed(1)+'M', cls:'blue', chg:'Total contract value', dir:'up'},
   ];
+  document.getElementById('metricsEl').innerHTML = defs.map(d=>`
+    <div class="metric-card">
+      <div class="metric-lbl">${d.lbl}</div>
+      <div class="metric-val ${d.cls}">${d.val}</div>
+      <div class="metric-chg ${d.dir}">${d.chg}</div>
+    </div>`).join('');
+}
 
-  // DATA: [won, lost, pending] per period label
-  const DATA = {
-    monthly: {
-      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-      sub: 'Jan – Dec 2024 · Number of contracts',
-      label: '2024 Monthly',
-      won:     [4,3,5,6,4,7,5,8,6,7,8,9],
-      lost:    [3,4,3,2,4,3,4,3,3,2,3,2],
-      pending: [1,1,2,1,2,1,1,2,1,2,1,2],
-      // won/lost by category [cat0..cat5]
-      catWon:  [18, 15, 12, 8,  7,  5],
-      catLost: [10, 8,  9,  6,  5,  6],
-      catPend: [4,  3,  2,  2,  2,  1],
-      // contract value in ₱M per period
-      wonVal:  [12,10,15,18,13,20,16,22,19,21,24,27],
-      lostVal: [8, 11,9, 7, 12,9, 11,8, 9, 7, 9, 6],
-      metrics: { totalBids: 147, won: 72, lost: 45, pending: 30, winRate: '61.5%', wonVal: '₱217M', lostVal: '₱106M', avg: '₱3.0M' }
-    },
-    quarterly: {
-      labels: ['Q1 2023','Q2 2023','Q3 2023','Q4 2023','Q1 2024','Q2 2024','Q3 2024','Q4 2024'],
-      sub: 'Q1 2023 – Q4 2024 · Number of contracts',
-      label: 'Quarterly View',
-      won:     [14,17,18,20,12,17,19,24],
-      lost:    [9, 8, 7, 6, 10,9, 10,8],
-      pending: [3, 4, 3, 4, 4, 4,  4, 6],
-      catWon:  [36,29,25,18,16,11],
-      catLost: [18,15,16,11,10,10],
-      catPend: [8, 6, 5, 4, 4, 3],
-      wonVal:  [37,46,50,55,35,51,57,74],
-      lostVal: [24,22,19,16,28,25,28,22],
-      metrics: { totalBids: 276, won: 141, lost: 80, pending: 55, winRate: '63.8%', wonVal: '₱405M', lostVal: '₱184M', avg: '₱2.9M' }
-    },
-    yearly: {
-      labels: ['2020','2021','2022','2023','2024'],
-      sub: '2020 – 2024 · Number of contracts',
-      label: '5-Year Overview',
-      won:     [38, 44, 55, 69, 72],
-      lost:    [28, 25, 22, 30, 45],
-      pending: [8,  10, 12, 14, 30],
-      catWon:  [60, 48, 40, 30, 26, 18],
-      catLost: [32, 26, 28, 20, 17, 17],
-      catPend: [14, 11, 9,  7,  7,  5],
-      wonVal:  [95, 118, 148, 187, 217],
-      lostVal: [70, 65,  58,  72, 106],
-      metrics: { totalBids: 753, won: 278, lost: 150, pending: 74, winRate: '65.0%', wonVal: '₱765M', lostVal: '₱371M', avg: '₱2.8M' }
-    }
-  };
+// ── RENDER GAUGE ───────────────────────────────────────────────────
+function renderGauge(){
+  const s = globalStats();
+  document.getElementById('gaugeNum').textContent = s.wr+'%';
+  document.getElementById('winBar').style.width   = s.wr+'%';
+  document.getElementById('lossBar').style.width  = (100-s.wr)+'%';
+  document.getElementById('winCountLbl').textContent  = 'Won: '+s.won;
+  document.getElementById('lossCountLbl').textContent = 'Lost: '+s.lost;
+  document.getElementById('gs-won').textContent   = s.won;
+  document.getElementById('gs-lost').textContent  = s.lost;
+  document.getElementById('gs-pend').textContent  = s.pending;
+  document.getElementById('gs-total').textContent = s.total;
+}
 
-  const CONTRACTS = [
-    { name: 'MWSS Water Treatment Plant Upgrade',         cat: 'WTP & WWTP Process Equip.', client: 'MWSS',         val: '₱18.4M', date: 'Dec 10, 2024', status: 'won',  margin: '+22%' },
-    { name: 'Meralco SCADA Monitoring System',            cat: 'Automation & SCADA',        client: 'Meralco',      val: '₱14.2M', date: 'Dec 5, 2024',  status: 'won',  margin: '+18%' },
-    { name: 'PNOC Pump Station Overhaul',                 cat: 'Pumps & Motors',            client: 'PNOC',         val: '₱9.6M',  date: 'Nov 28, 2024', status: 'lost', margin: '–3%' },
-    { name: 'DOH Chlorination Equipment Supply',          cat: 'Water Disinfection Chemicals',client:'DOH',         val: '₱6.1M',  date: 'Nov 20, 2024', status: 'won',  margin: '+15%' },
-    { name: 'NPC Control Instrumentation Package',        cat: 'Instrumentation & Controls', client: 'NPC',         val: '₱22.0M', date: 'Nov 14, 2024', status: 'pending', margin: '—' },
-    { name: 'DPWH Electromechanical Gate Systems',        cat: 'Electromechanical Equip.',  client: 'DPWH',         val: '₱11.8M', date: 'Nov 8, 2024',  status: 'lost', margin: '–7%' },
-    { name: 'Manila Water Level Sensors & Transmitters',  cat: 'Instrumentation & Controls', client: 'Manila Water', val: '₱7.5M',  date: 'Oct 30, 2024', status: 'won',  margin: '+21%' },
-    { name: 'Bangko Sentral HVAC Motor Controls',         cat: 'Electromechanical Equip.',  client: 'BSP',          val: '₱5.3M',  date: 'Oct 22, 2024', status: 'won',  margin: '+14%' },
-    { name: 'Laguna Lake WWTP Process Equipment',         cat: 'WTP & WWTP Process Equip.', client: 'LLDA',         val: '₱16.7M', date: 'Oct 15, 2024', status: 'pending', margin: '—' },
-    { name: 'Maynilad Pump Replacement Program',          cat: 'Pumps & Motors',            client: 'Maynilad',     val: '₱13.4M', date: 'Oct 8, 2024',  status: 'won',  margin: '+19%' },
-    { name: 'PPA Port Automation & Control',              cat: 'Automation & SCADA',        client: 'PPA',          val: '₱19.5M', date: 'Sep 28, 2024', status: 'lost', margin: '–5%' },
-    { name: 'Cagayan Water District Chlorination',        cat: 'Water Disinfection Chemicals',client:'CAWD',        val: '₱4.2M',  date: 'Sep 20, 2024', status: 'won',  margin: '+17%' },
-  ];
-
-  let period = 'monthly';
-  let mainChart, valueChart, donutChart;
-
-  function updateMetrics(d) {
-    const m = d.metrics;
-    const defs = [
-      { label: 'Total Bids',     value: m.totalBids, cls: 'norm', change: 'Across all categories', dir: 'neutral' },
-      { label: 'Contracts Won',  value: m.won,       cls: 'win',  change: `Win rate: ${m.winRate}`, dir: 'up' },
-      { label: 'Contracts Lost', value: m.lost,      cls: 'loss', change: 'Review needed',         dir: 'down' },
-      { label: 'Pending / Active', value: m.pending, cls: 'pend', change: 'Awaiting decision',     dir: 'neutral' },
-      { label: 'Total Won Value', value: m.wonVal,   cls: 'acc',  change: `Avg ${m.avg} / contract`, dir: 'up' },
-    ];
-    document.getElementById('metrics').innerHTML = defs.map(m2 => `
-      <div class="metric-card">
-        <div class="metric-label">${m2.label}</div>
-        <div class="metric-value ${m2.cls}">${m2.value}</div>
-        <div class="metric-change ${m2.dir}">${m2.change}</div>
+// ── RENDER CAT SUMMARY ─────────────────────────────────────────────
+function renderCatSummary(){
+  const stats = catStats();
+  document.getElementById('catSumList').innerHTML = CATS.map((c,i)=>{
+    const {won,lost,pending} = stats[i];
+    const tot = won+lost+pending || 1;
+    const wr  = (won+lost)>0 ? Math.round(won/(won+lost)*100) : 0;
+    const wPct= Math.round(won/tot*100);
+    const lPct= Math.round(lost/tot*100);
+    return `<li class="cat-sum-item">
+      <div class="cat-sum-top">
+        <div class="cat-sum-name">
+          <span class="cat-dot" style="background:${c.color}"></span>
+          <span class="cat-name">${c.num} ${c.name}</span>
+        </div>
+        <div class="cat-badges">
+          <span class="cat-badge w">↑${won}</span>
+          <span class="cat-badge l">↓${lost}</span>
+          <span class="cat-badge r">${wr}% rate</span>
+        </div>
       </div>
-    `).join('');
-  }
+      <div class="wl-bar-wrap">
+        <div class="wl-bar-win" style="width:${wPct}%"></div>
+        <div class="wl-bar-loss" style="width:${lPct}%"></div>
+      </div>
+    </li>`;
+  }).join('');
+}
 
-  function updateGauge(d) {
-    const totalDecided = d.metrics.won + d.metrics.lost;
-    const wr = Math.round(d.metrics.won / totalDecided * 100);
-    const winPct = wr;
-    const lossPct = 100 - wr;
-    document.getElementById('winRateNum').textContent = wr + '%';
-    document.getElementById('winBar').style.width = winPct + '%';
-    document.getElementById('lossBar').style.width = lossPct + '%';
-    document.getElementById('winCountLabel').textContent = 'Won: ' + d.metrics.won;
-    document.getElementById('lossCountLabel').textContent = 'Lost: ' + d.metrics.lost;
-    document.getElementById('gs-won').textContent = d.metrics.won;
-    document.getElementById('gs-lost').textContent = d.metrics.lost;
-    document.getElementById('gs-pend').textContent = d.metrics.pending;
-    document.getElementById('gs-val').textContent = d.metrics.wonVal;
-  }
+// ── RENDER CHARTS ──────────────────────────────────────────────────
+function renderMainChart(){
+  const d = PERIODS[period];
+  document.getElementById('chart-sub').textContent = d.sub+' · Number of contracts';
+  document.getElementById('period-label').textContent = d.label;
 
-  function updateCatList(d) {
-    const total = d.catWon.reduce((a,b) => a+b, 0);
-    document.getElementById('catList').innerHTML = CATS.map((c,i) => {
-      const w = d.catWon[i], l = d.catLost[i], p = d.catPend[i];
-      const tot = w + l + p;
-      const wr = Math.round(w / (w + l) * 100);
-      const wPct = Math.round(w / tot * 100);
-      const lPct = Math.round(l / tot * 100);
-      return `<li class="cat-item">
-        <div class="cat-top">
-          <div class="cat-name-wrap">
-            <span class="cat-dot" style="background:${c.color}"></span>
-            <span class="cat-name">${c.name}</span>
-          </div>
-          <div class="cat-stats">
-            <span class="cat-stat w">↑${w} won</span>
-            <span class="cat-stat l">↓${l} lost</span>
-            <span class="cat-stat r">${wr}% rate</span>
-          </div>
-        </div>
-        <div class="wl-bar-wrap" style="height:6px;">
-          <div class="wl-bar-win"  style="width:${wPct}%"></div>
-          <div class="wl-bar-loss" style="width:${lPct}%"></div>
-        </div>
-      </li>`;
-    }).join('');
-  }
+  // merge user entries into period totals
+  const now = new Date();
+  const userWon=[], userLost=[], userPend=[];
 
-  function updateDonut(d) {
-    const ctx = document.getElementById('donutChart').getContext('2d');
-    if (donutChart) donutChart.destroy();
-    donutChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: CATS.map(c => c.short),
-        datasets: [{
-          data: d.catWon,
-          backgroundColor: CATS.map(c => c.color + 'cc'),
-          borderColor: CATS.map(c => c.color),
-          borderWidth: 1.5,
-          hoverOffset: 8,
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false, cutout: '64%',
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#181c24',
-            borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1,
-            titleColor: '#eef0f4', bodyColor: '#7e8a9e', padding: 12,
-            callbacks: {
-              label: ctx2 => {
-                const sum = d.catWon.reduce((a,b) => a+b, 0);
-                const pct = Math.round(ctx2.parsed / sum * 100);
-                return ` ${ctx2.label}: ${ctx2.parsed} contracts (${pct}%)`;
-              }
-            }
-          }
-        }
+  d.labels.forEach((lbl,idx)=>{
+    let w=0,l=0,p=0;
+    contracts.forEach(c=>{
+      const cd = new Date(c.date);
+      let match = false;
+      if(period==='monthly'){
+        match = (cd.getFullYear()===2024 && cd.getMonth()===idx);
+      } else if(period==='quarterly'){
+        const qYear = idx<4?2023:2024;
+        const qIdx  = idx%4;
+        match = (cd.getFullYear()===qYear && Math.floor(cd.getMonth()/3)===qIdx);
+      } else {
+        match = (cd.getFullYear()===(2020+idx));
       }
+      if(match){ if(c.status==='won')w++; else if(c.status==='lost')l++; else p++; }
     });
-    const sum = d.catWon.reduce((a,b) => a+b, 0);
-    document.getElementById('donut-legend').innerHTML = CATS.map((c,i) => `
-      <span class="legend-item">
-        <span class="legend-dot" style="background:${c.color}"></span>
-        ${c.short} (${Math.round(d.catWon[i]/sum*100)}%)
-      </span>
-    `).join('');
-  }
-
-  function renderMain(d) {
-    const ctx = document.getElementById('mainChart').getContext('2d');
-    if (mainChart) mainChart.destroy();
-    mainChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: d.labels,
-        datasets: [
-          { label: 'Won',     data: d.won,     backgroundColor: 'rgba(34,201,138,0.75)',  borderColor: '#22c98a', borderWidth:1, borderRadius:4, borderSkipped:false },
-          { label: 'Lost',    data: d.lost,    backgroundColor: 'rgba(240,79,79,0.70)',   borderColor: '#f04f4f', borderWidth:1, borderRadius:4, borderSkipped:false },
-          { label: 'Pending', data: d.pending, backgroundColor: 'rgba(245,166,35,0.65)',  borderColor: '#f5a623', borderWidth:1, borderRadius:4, borderSkipped:false },
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#181c24',
-            borderColor: 'rgba(255,255,255,0.08)', borderWidth:1,
-            titleColor: '#eef0f4', bodyColor: '#7e8a9e', padding: 12,
-          }
-        },
-        scales: {
-          x: {
-            grid: { color: 'rgba(255,255,255,0.04)' },
-            ticks: { font:{size:11,family:"'DM Mono',monospace"}, color:'#444f62', maxRotation:45, autoSkip:true, maxTicksLimit:12 },
-            border: { color:'rgba(255,255,255,0.07)' }
-          },
-          y: {
-            grid: { color: 'rgba(255,255,255,0.04)' },
-            ticks: { font:{size:11,family:"'DM Mono',monospace"}, color:'#444f62', stepSize:1 },
-            border: { color:'rgba(255,255,255,0.07)' }
-          }
-        }
-      }
-    });
-  }
-
-  function renderValue(d) {
-    const ctx = document.getElementById('valueChart').getContext('2d');
-    if (valueChart) valueChart.destroy();
-    valueChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: d.labels,
-        datasets: [
-          { label: 'Won Value',  data: d.wonVal,  backgroundColor:'rgba(34,201,138,0.70)', borderColor:'#22c98a', borderWidth:1, borderRadius:4, borderSkipped:false },
-          { label: 'Lost Value', data: d.lostVal, backgroundColor:'rgba(240,79,79,0.65)',  borderColor:'#f04f4f', borderWidth:1, borderRadius:4, borderSkipped:false },
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#181c24',
-            borderColor:'rgba(255,255,255,0.08)', borderWidth:1,
-            titleColor:'#eef0f4', bodyColor:'#7e8a9e', padding:12,
-            callbacks: { label: ctx2 => ` ${ctx2.dataset.label}: ₱${ctx2.parsed.y.toFixed(1)}M` }
-          }
-        },
-        scales: {
-          x: {
-            grid: { color:'rgba(255,255,255,0.04)' },
-            ticks: { font:{size:11,family:"'DM Mono',monospace"}, color:'#444f62', maxRotation:45, autoSkip:true, maxTicksLimit:12 },
-            border: { color:'rgba(255,255,255,0.07)' }
-          },
-          y: {
-            grid: { color:'rgba(255,255,255,0.04)' },
-            ticks: { font:{size:11,family:"'DM Mono',monospace"}, color:'#444f62', callback: v => '₱'+v+'M' },
-            border: { color:'rgba(255,255,255,0.07)' }
-          }
-        }
-      }
-    });
-  }
-
-  function renderContracts() {
-    const statusMap = {
-      won: `<span class="status-chip won"><span class="chip-dot"></span>Won</span>`,
-      lost: `<span class="status-chip lost"><span class="chip-dot"></span>Lost</span>`,
-      pending: `<span class="status-chip pend"><span class="chip-dot"></span>Pending</span>`,
-    };
-    document.getElementById('contractsTable').innerHTML = CONTRACTS.map(c => `
-      <tr>
-        <td class="td-name">${c.name}</td>
-        <td>${c.cat}</td>
-        <td>${c.client}</td>
-        <td style="font-family:'DM Mono',monospace;">${c.val}</td>
-        <td style="font-family:'DM Mono',monospace;white-space:nowrap;">${c.date}</td>
-        <td>${statusMap[c.status]}</td>
-        <td style="font-family:'DM Mono',monospace;color:${c.margin.startsWith('+') ? 'var(--win)' : c.margin === '—' ? 'var(--text-muted)' : 'var(--loss)'};">${c.margin}</td>
-      </tr>
-    `).join('');
-  }
-
-  function render() {
-    const d = DATA[period];
-    document.getElementById('chart-sub').textContent = d.sub;
-    document.getElementById('period-label').textContent = d.label;
-    updateMetrics(d);
-    updateGauge(d);
-    renderMain(d);
-    renderValue(d);
-    updateDonut(d);
-    updateCatList(d);
-    renderContracts();
-  }
-
-  document.querySelectorAll('.period-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      period = btn.dataset.period;
-      render();
-    });
+    userWon.push(d.won[idx]+(w));
+    userLost.push(d.lost[idx]+(l));
+    userPend.push(d.pending[idx]+(p));
   });
 
-  render();
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  if(mainChart) mainChart.destroy();
+  mainChart = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:d.labels,
+      datasets:[
+        {label:'Won', data:userWon, backgroundColor:'rgba(34,201,138,.72)',borderColor:'#22c98a',borderWidth:1,borderRadius:4,borderSkipped:false},
+        {label:'Lost',data:userLost,backgroundColor:'rgba(240,79,79,.68)', borderColor:'#f04f4f',borderWidth:1,borderRadius:4,borderSkipped:false},
+        {label:'Pending',data:userPend,backgroundColor:'rgba(245,166,35,.62)',borderColor:'#f5a623',borderWidth:1,borderRadius:4,borderSkipped:false},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#181c24',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#eef0f4',bodyColor:'#7e8a9e',padding:12}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:11,family:"'DM Mono',monospace"},color:'#444f62',maxRotation:45,autoSkip:true,maxTicksLimit:12},border:{color:'rgba(255,255,255,.07)'}},
+        y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:11,family:"'DM Mono',monospace"},color:'#444f62',stepSize:1},border:{color:'rgba(255,255,255,.07)'}}
+      }
+    }
+  });
+}
+
+function renderValueChart(){
+  const d = PERIODS[period];
+  const ctx = document.getElementById('valueChart').getContext('2d');
+  if(valueChart) valueChart.destroy();
+  valueChart = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:d.labels,
+      datasets:[
+        {label:'Won Value', data:d.wonVal, backgroundColor:'rgba(34,201,138,.70)',borderColor:'#22c98a',borderWidth:1,borderRadius:4,borderSkipped:false},
+        {label:'Lost Value',data:d.lostVal,backgroundColor:'rgba(240,79,79,.65)',borderColor:'#f04f4f',borderWidth:1,borderRadius:4,borderSkipped:false},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#181c24',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#eef0f4',bodyColor:'#7e8a9e',padding:12,callbacks:{label:c=>' '+c.dataset.label+': ₱'+c.parsed.y.toFixed(1)+'M'}}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:11,family:"'DM Mono',monospace"},color:'#444f62',maxRotation:45,autoSkip:true,maxTicksLimit:12},border:{color:'rgba(255,255,255,.07)'}},
+        y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:11,family:"'DM Mono',monospace"},color:'#444f62',callback:v=>'₱'+v+'M'},border:{color:'rgba(255,255,255,.07)'}}
+      }
+    }
+  });
+}
+
+function renderDonut(){
+  const stats = catStats();
+  const ctx = document.getElementById('donutChart').getContext('2d');
+  if(donutChart) donutChart.destroy();
+  const wonCounts = stats.map(s=>s.won);
+  donutChart = new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:CATS.map(c=>c.num+' '+c.name),
+      datasets:[{
+        data:wonCounts,
+        backgroundColor:CATS.map(c=>c.color+'cc'),
+        borderColor:CATS.map(c=>c.color),
+        borderWidth:1.5,hoverOffset:8
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'64%',
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#181c24',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#eef0f4',bodyColor:'#7e8a9e',padding:12,
+        callbacks:{label:c=>{const sum=wonCounts.reduce((a,b)=>a+b,0);return ' '+c.label+': '+c.parsed+(sum?' ('+Math.round(c.parsed/sum*100)+'%)':'')}}
+      }}
+    }
+  });
+  const sum = wonCounts.reduce((a,b)=>a+b,0);
+  document.getElementById('donutLegend').innerHTML = CATS.map((c,i)=>`
+    <span class="leg-item">
+      <span class="leg-dot" style="background:${c.color}"></span>
+      ${c.num} ${c.name.split(' ').slice(0,2).join(' ')} (${sum?Math.round(wonCounts[i]/sum*100):0}%)
+    </span>`).join('');
+}
+
+// ── RENDER TABLE ───────────────────────────────────────────────────
+function renderTable(){
+  const filterCat    = document.getElementById('filterCat').value;
+  const filterStatus = document.getElementById('filterStatus').value;
+  let list = [...contracts].reverse();
+  if(filterCat!=='')    list = list.filter(c=>c.catId===+filterCat);
+  if(filterStatus!=='') list = list.filter(c=>c.status===filterStatus);
+  document.getElementById('logCount').textContent = list.length+' entr'+(list.length===1?'y':'ies');
+  const tbody = document.getElementById('contractsBody');
+  const empty = document.getElementById('emptyState');
+  if(list.length===0){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  const chipMap={
+    won:`<span class="status-chip chip-won"><span class="chip-dot"></span>Won</span>`,
+    lost:`<span class="status-chip chip-lost"><span class="chip-dot"></span>Lost</span>`,
+    pending:`<span class="status-chip chip-pending"><span class="chip-dot"></span>Pending</span>`,
+  };
+  tbody.innerHTML = list.map(c=>{
+    const cat = CATS[c.catId];
+    const d   = c.date ? new Date(c.date).toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'}) : '—';
+    return `<tr>
+      <td class="td-name">${c.name}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:7px;height:7px;border-radius:2px;background:${cat.color};flex-shrink:0;display:inline-block"></span>${cat.num} ${cat.name}</span></td>
+      <td style="font-size:12px">${c.sub||'—'}</td>
+      <td>${c.client||'—'}</td>
+      <td style="font-family:'DM Mono',monospace">₱${(c.val||0).toFixed(1)}M</td>
+      <td style="font-family:'DM Mono',monospace;white-space:nowrap;font-size:12px">${d}</td>
+      <td>${chipMap[c.status]||''}</td>
+      <td><button class="del-btn" onclick="deleteBid('${c.id}')" title="Delete">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── ADD / DELETE ───────────────────────────────────────────────────
+function toggleAddPanel(){
+  const p = document.getElementById('addPanel');
+  p.style.display = p.style.display==='none' ? 'block' : 'none';
+}
+
+function submitBid(){
+  const name   = document.getElementById('f-name').value.trim();
+  const catVal = document.getElementById('f-cat').value;
+  const sub    = document.getElementById('f-sub').value;
+  const client = document.getElementById('f-client').value.trim();
+  const val    = parseFloat(document.getElementById('f-val').value)||0;
+  const status = document.getElementById('f-status').value;
+  const date   = document.getElementById('f-date').value;
+
+  if(!name){alert('Please enter a project name.');return;}
+  if(catVal===''){alert('Please select a category.');return;}
+
+  contracts.push({id:uid(),name,catId:+catVal,sub,client,val,date,status});
+  save();
+  // reset
+  document.getElementById('f-name').value='';
+  document.getElementById('f-client').value='';
+  document.getElementById('f-val').value='';
+  document.getElementById('f-status').value='won';
+  document.getElementById('addPanel').style.display='none';
+  renderAll();
+}
+
+function deleteBid(id){
+  if(!confirm('Remove this entry?')) return;
+  contracts = contracts.filter(c=>c.id!==id);
+  save();
+  renderAll();
+}
+
+// ── RENDER ALL ─────────────────────────────────────────────────────
+function renderAll(){
+  renderMetrics();
+  renderGauge();
+  renderCatSummary();
+  renderMainChart();
+  renderValueChart();
+  renderDonut();
+  renderTable();
+}
+
+renderAll();
 </script>
 </body>
 </html>
