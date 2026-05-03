@@ -488,7 +488,7 @@ footer p{font-size:12px;color:var(--text3)}
 
 <footer>
   <p>© 2024 BidTracker · Industrial Automation & SCADA · All data is stored locally in your browser</p>
-  <span class="footer-tag">v3.3.0 · bidding-analytics</span>
+  <span class="footer-tag">v3.3.1 · bidding-analytics</span>
 </footer>
 </div>
 
@@ -570,8 +570,11 @@ let selectedCats = null; // null = all
 // Form category state
 let formSelectedCats = new Set();
 
-// Form sub-product state (NEW)
-let formSelectedSubs = new Set(); // values are "catId||subName"
+// Form sub-product state
+// Keys are stored as "catId||subName" — but we store them in a Map keyed by index
+// to avoid any quote/encoding issues with special characters in sub names.
+// The actual key used internally is a safe numeric index string: "catId_subIdx"
+let formSelectedSubs = new Set(); // values are "catId_subIdx" (safe numeric keys)
 
 let activePortalId = null;
 
@@ -635,7 +638,7 @@ window.addEventListener('scroll', function(){
 function buildLogCatDropdownHTML(){
   const opts = CATS.map(c=>`
     <div class="multiselect-option${selectedCats===null||selectedCats.has(c.id)?' selected':''}"
-         onclick="logCatToggle(${c.id},this)">
+         data-logcatid="${c.id}" onclick="logCatToggleEl(this)">
       <div class="ms-checkbox"><span class="ms-check">✓</span></div>
       <span class="ms-color-dot" style="background:${c.color}"></span>
       <span class="ms-option-label">${c.num} ${c.name}</span>
@@ -660,22 +663,13 @@ function toggleMultiSelect(){
   openPortalDropdown('logCat', trigger, buildLogCatDropdownHTML, applyLogCat);
 }
 
-function logCatToggle(catId, el){
+function logCatToggleEl(el){
+  const catId = parseInt(el.getAttribute('data-logcatid'));
   if(selectedCats===null) selectedCats = new Set(CATS.map(c=>c.id));
   if(selectedCats.has(catId)) selectedCats.delete(catId);
   else selectedCats.add(catId);
   if(selectedCats.size===CATS.length) selectedCats=null;
-  const dd = document.getElementById('portal-dd-logCat');
-  if(dd){
-    const optsCont = dd.querySelector('.multiselect-options');
-    if(optsCont) optsCont.innerHTML = CATS.map(c=>`
-      <div class="multiselect-option${selectedCats===null||selectedCats.has(c.id)?' selected':''}"
-           onclick="logCatToggle(${c.id},this)">
-        <div class="ms-checkbox"><span class="ms-check">✓</span></div>
-        <span class="ms-color-dot" style="background:${c.color}"></span>
-        <span class="ms-option-label">${c.num} ${c.name}</span>
-      </div>`).join('');
-  }
+  logCatRefreshOptions();
 }
 
 function logCatSelectAll(e){e.stopPropagation();selectedCats=null;logCatRefreshOptions();}
@@ -686,7 +680,7 @@ function logCatRefreshOptions(){
   const optsCont = dd.querySelector('.multiselect-options');
   if(optsCont) optsCont.innerHTML = CATS.map(c=>`
     <div class="multiselect-option${selectedCats===null||selectedCats.has(c.id)?' selected':''}"
-         onclick="logCatToggle(${c.id},this)">
+         data-logcatid="${c.id}" onclick="logCatToggleEl(this)">
       <div class="ms-checkbox"><span class="ms-check">✓</span></div>
       <span class="ms-color-dot" style="background:${c.color}"></span>
       <span class="ms-option-label">${c.num} ${c.name}</span>
@@ -722,7 +716,7 @@ function updateLogCatLabel(){
 function buildFormCatDropdownHTML(){
   const opts = CATS.map(c=>`
     <div class="multiselect-option${formSelectedCats.has(c.id)?' selected':''}"
-         onclick="formCatToggle(${c.id},this)">
+         data-formcatid="${c.id}" onclick="formCatToggleEl(this)">
       <div class="ms-checkbox"><span class="ms-check">✓</span></div>
       <span class="ms-color-dot" style="background:${c.color}"></span>
       <span class="ms-option-label">${c.num} ${c.name}</span>
@@ -747,7 +741,8 @@ function toggleFormCatSelect(){
   openPortalDropdown('formCat', trigger, buildFormCatDropdownHTML, applyFormCat);
 }
 
-function formCatToggle(catId, el){
+function formCatToggleEl(el){
+  const catId = parseInt(el.getAttribute('data-formcatid'));
   if(formSelectedCats.has(catId)) formSelectedCats.delete(catId);
   else formSelectedCats.add(catId);
   formCatRefreshOptions();
@@ -760,7 +755,7 @@ function formCatRefreshOptions(){
   const optsCont = dd.querySelector('.multiselect-options');
   if(optsCont) optsCont.innerHTML = CATS.map(c=>`
     <div class="multiselect-option${formSelectedCats.has(c.id)?' selected':''}"
-         onclick="formCatToggle(${c.id},this)">
+         data-formcatid="${c.id}" onclick="formCatToggleEl(this)">
       <div class="ms-checkbox"><span class="ms-check">✓</span></div>
       <span class="ms-color-dot" style="background:${c.color}"></span>
       <span class="ms-option-label">${c.num} ${c.name}</span>
@@ -781,18 +776,31 @@ function updateFormCatLabel(){
   else{lbl.textContent=n+' categories selected';tr.classList.add('has-selection');addCountBadge(tr,n);}
 }
 
-/* ── FORM SUB-PRODUCT MULTISELECT (NEW) ── */
+/* ── FORM SUB-PRODUCT MULTISELECT ── */
+// Safe key: "catId_subIdx" — no special characters, no quotes needed
 function getFormSubItems(){
   const items = [];
   CATS.forEach(c => {
     if(!formSelectedCats.has(c.id)) return;
-    c.subs.forEach(s => items.push({key: c.id+'||'+s, catColor: c.color, catNum: c.num, label: s}));
+    c.subs.forEach((s, si) => items.push({
+      safeKey: c.id + '_' + si,
+      catId: c.id,
+      subIdx: si,
+      subName: s,
+      catColor: c.color,
+      catNum: c.num
+    }));
   });
   return items;
 }
 
+// Convert safeKey back to sub name for saving
+function safeKeyToSubName(safeKey){
+  const [catId, subIdx] = safeKey.split('_').map(Number);
+  return CATS[catId] && CATS[catId].subs[subIdx] ? CATS[catId].subs[subIdx] : '';
+}
+
 function updateFormSubOptions(){
-  // Reset sub selections whenever categories change
   formSelectedSubs = new Set();
   updateFormSubLabel();
   const trigger = document.getElementById('formSubTrigger');
@@ -806,12 +814,13 @@ function updateFormSubOptions(){
 function buildFormSubDropdownHTML(){
   const items = getFormSubItems();
   if(items.length === 0) return '<div style="padding:14px;font-size:13px;color:var(--text3)">Select a category first</div>';
+  // FIX: use data-safekey attribute instead of JSON.stringify in onclick
   const opts = items.map(it => `
-    <div class="multiselect-option${formSelectedSubs.has(it.key)?' selected':''}"
-         onclick="formSubToggle(${JSON.stringify(it.key)},this)">
+    <div class="multiselect-option${formSelectedSubs.has(it.safeKey)?' selected':''}"
+         data-safekey="${it.safeKey}" onclick="formSubToggleEl(this)">
       <div class="ms-checkbox"><span class="ms-check">✓</span></div>
       <span class="ms-color-dot" style="background:${it.catColor}"></span>
-      <span class="ms-option-label">${it.label}</span>
+      <span class="ms-option-label">${it.subName}</span>
     </div>`).join('');
   return `
     <div class="multiselect-header">
@@ -834,14 +843,18 @@ function toggleFormSubSelect(){
   openPortalDropdown('formSub', trigger, buildFormSubDropdownHTML, applyFormSub);
 }
 
-function formSubToggle(key, el){
+// FIX: element-based toggle — reads safeKey from data attribute, no quote issues
+function formSubToggleEl(el){
+  const key = el.getAttribute('data-safekey');
+  if(!key) return;
   if(formSelectedSubs.has(key)) formSelectedSubs.delete(key);
   else formSelectedSubs.add(key);
   formSubRefreshOptions();
 }
+
 function formSubSelectAll(e){
   e.stopPropagation();
-  formSelectedSubs = new Set(getFormSubItems().map(it=>it.key));
+  formSelectedSubs = new Set(getFormSubItems().map(it => it.safeKey));
   formSubRefreshOptions();
 }
 function formSubClearAll(e){
@@ -853,12 +866,13 @@ function formSubRefreshOptions(){
   const dd = document.getElementById('portal-dd-formSub');
   if(!dd) return;
   const optsCont = dd.querySelector('.multiselect-options');
+  // FIX: same data-safekey pattern here too
   if(optsCont) optsCont.innerHTML = getFormSubItems().map(it=>`
-    <div class="multiselect-option${formSelectedSubs.has(it.key)?' selected':''}"
-         onclick="formSubToggle(${JSON.stringify(it.key)},this)">
+    <div class="multiselect-option${formSelectedSubs.has(it.safeKey)?' selected':''}"
+         data-safekey="${it.safeKey}" onclick="formSubToggleEl(this)">
       <div class="ms-checkbox"><span class="ms-check">✓</span></div>
       <span class="ms-color-dot" style="background:${it.catColor}"></span>
-      <span class="ms-option-label">${it.label}</span>
+      <span class="ms-option-label">${it.subName}</span>
     </div>`).join('');
   updateFormSubLabel();
 }
@@ -885,7 +899,7 @@ function updateFormSubLabel(){
     addCountBadge(tr, n);
   } else if(n === 1){
     const key = [...formSelectedSubs][0];
-    lbl.textContent = key.split('||')[1];
+    lbl.textContent = safeKeyToSubName(key);
     tr.classList.add('has-selection');
   } else {
     lbl.textContent = n+' sub-products';
@@ -1073,7 +1087,7 @@ function renderTable(){
   }).join('');
 }
 
-/* ── SUBMIT BID (updated to use formSelectedSubs) ── */
+/* ── SUBMIT BID (uses safeKey → resolved to sub name) ── */
 function submitBid(){
   const name=document.getElementById('f-name').value.trim();
   const client=document.getElementById('f-client').value.trim();
@@ -1084,10 +1098,9 @@ function submitBid(){
   if(formSelectedCats.size===0){alert('Please select at least one category.');return;}
   if(formSelectedSubs.size===0){alert('Please select at least one sub-product.');return;}
 
-  formSelectedSubs.forEach(key=>{
-    const parts=key.split('||');
-    const catId=+parts[0];
-    const sub=parts[1];
+  formSelectedSubs.forEach(safeKey=>{
+    const [catId, subIdx] = safeKey.split('_').map(Number);
+    const sub = CATS[catId] && CATS[catId].subs[subIdx] ? CATS[catId].subs[subIdx] : '';
     contracts.push({id:uid(),name,catId,sub,client,val,date,status});
   });
 
